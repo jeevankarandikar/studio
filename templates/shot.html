@@ -1,0 +1,26 @@
+<!doctype html>
+<meta charset="utf-8">
+<link rel="stylesheet" href="common.css">
+<body>
+<div id="amb"></div>
+<div id="head" class="abs h2" style="left:160px;top:200px;width:620px">{{HEADLINE}}</div>
+<div id="stage"></div>
+<script src="common.js"></script>
+<script>
+// A product screenshot springs in, then drifts. Put real screenshots in brand/shots/ and list them
+// in project.json as "needs" so a render fails clearly when one is missing.
+const words = splitWords($('head'));
+const frame = shotFrame($('stage'), '../brand/shots/{{SHOT}}', { w: 1060, h: 700, title: {{SHOT_TITLE_JS}} });
+window.scene = {
+  render(t, f, ctx) {
+    ambient($('amb'), t);
+    wordsIn(words, t, { delay: 0.1, step: 0.08 });
+    const K = kick(ctx) * clamp((t - 0.8) / 0.2);
+    pos(frame, 820 + sp(t, 0.3, spring.bouncy, 600, 0), 190 + Math.sin(t * 1.1) * 8 - K * 8, `scale(${sp(t, 0.3, spring.snappy, 0.85, 1) + K * 0.008}) rotate(${sp(t, 0.3, spring.soft, 3, 0)}deg)`);
+    frame.style.opacity = clamp((t - 0.3) / 0.12);
+    parallax(frame, 0, -sp(t, 1.0, spring.soft, 0, 140), 1 + sp(t, 1.0, spring.soft, 0, 0.04)); // slow scroll down the screen
+    const out = sp(t, 2.5, spring.snappy, 0, 1);
+    document.body.style.transform = `translateX(${-out * 140}px)`;
+  },
+};
+</script>

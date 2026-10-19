@@ -1,0 +1,7 @@
+node_modules/
+# local projects live in the repo they are for; anything here is scratch
+projects/
+out/
+.frames/
+frames/
+.design-refs/

@@ -1,0 +1,26 @@
+<!doctype html>
+<meta charset="utf-8">
+<link rel="stylesheet" href="common.css">
+<body>
+<div id="amb"></div>
+<img id="mark" class="abs" src="../brand/{{LOGO}}" style="left:0;top:0;width:300px;height:300px;object-fit:contain">
+<div id="url" class="abs h1" style="left:160px;top:470px;font-size:164px">{{CTA}}</div>
+<div id="bar" class="rule" style="left:166px;top:700px;width:560px;height:4px;background:var(--accent,var(--ink))"></div>
+<div id="sub" class="abs sub" style="left:166px;top:740px">{{CTA_SUB}}</div>
+<script src="common.js"></script>
+<script>
+const urlW = splitWords($('url'));
+const subW = splitWords($('sub'));
+window.scene = {
+  render(t, f, ctx) {
+    ambient($('amb'), t);
+    const K = kick(ctx) * clamp((t - 1.0) / 0.2); // every beat the layout answers the music
+    pos($('mark'), 1380, 150 + sp(t, 0, spring.bouncy, -300, 0) - K * 34, `scale(${sp(t, 0, spring.snappy, 0.7, 1) + K * 0.07}) rotate(${K * (ctx.beatIndex % 2 ? 4 : -4)}deg)`);
+    $('mark').style.opacity = clamp(t / 0.12);
+    wordsIn(urlW, t, { delay: 0.1, step: 0, rise: 110 });
+    $('bar').style.transform = `scaleX(${sp(t, 0.8, spring.snappy, 0, 1) * (1 + K * 0.12)}) scaleY(${1 + K * 1.2})`;
+    wordsIn(subW, t, { delay: 1.0, step: 0.12, rise: 40, preset: spring.soft });
+    document.body.style.opacity = 1 - clamp(sp(t, 2.6, spring.soft));
+  },
+};
+</script>
