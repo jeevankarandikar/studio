@@ -10,6 +10,70 @@ function pos(el, x, y, extra = '') { el.style.transform = `translate(${x}px,${y}
 // positions and scales so the layout answers the music.
 const kick = (ctx, k = 320, c = 13) => spring(ctx.beatPhase * ctx.beatSec, { k, c, from: 1, to: 0 });
 
+// Deterministic fractional hash: same input, same output, every run. This is the only
+// randomness allowed in scenes, since Math.random is lint-banned.
+function hash1(n) { const s = Math.sin(n * 127.1 + 311.7) * 43758.5453; return s - Math.floor(s); }
+
+// A kick that fires only on bar starts (every 4th beat). Multiply it into a scale or a
+// position the way kick() answers every beat, so big moments land on the downbeat.
+const downbeat = (ctx) => (ctx.beatIndex % 4 === 0 ? spring(ctx.beatPhase * ctx.beatSec, { k: 320, c: 13, from: 1, to: 0 }) : 0);
+
+// A textured stroke along a polyline, drawn with plain canvas. `progress` (0..1) reveals the
+// stroke from the first point, so it can draw itself on over a scene. Bristle offsets come
+// from hash1, never from Math.random, so the same frame twice is byte-identical.
+function brushStroke(g, pts, { progress = 1, width = 10, color = '#111', seed = 0, bristles = 3 } = {}) {
+  if (pts.length < 2 || progress <= 0) return 0;
+  let total = 0;
+  const seg = [];
+  for (let i = 1; i < pts.length; i++) {
+    const d = Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]);
+    seg.push(d); total += d;
+  }
+  let left = progress * total;
+  g.lineCap = 'round';
+  for (let i = 1; i < pts.length && left > 0; i++) {
+    const take = Math.min(seg[i - 1], left); left -= take;
+    const u = take / seg[i - 1];
+    const x0 = pts[i - 1][0], y0 = pts[i - 1][1];
+    const x1 = x0 + (pts[i][0] - x0) * u, y1 = y0 + (pts[i][1] - y0) * u;
+    const dx = x1 - x0, dy = y1 - y0, len = Math.hypot(dx, dy) || 1;
+    const nx = -dy / len, ny = dx / len;
+    for (let b = 0; b < bristles; b++) {
+      const off = (hash1(seed + i * 13.7 + b * 7.3) - 0.5) * width * 0.9;
+      g.strokeStyle = color;
+      g.globalAlpha = b === 0 ? 0.9 : 0.35;
+      g.lineWidth = width * (0.35 + 0.65 * hash1(seed + b * 3.1 + i));
+      g.beginPath(); g.moveTo(x0 + nx * off, y0 + ny * off); g.lineTo(x1 + nx * off, y1 + ny * off); g.stroke();
+    }
+  }
+  g.globalAlpha = 1;
+  return progress;
+}
+
+// Drifting particle orbs, seeded from a scene seed. Positions, sizes, drift speeds and
+// phases all come from hash1, so the field is a pure function of t and seed.
+function orbField(g, t, { seed = 0, count = 24, w = 1920, h = 1080, color = '#111' } = {}) {
+  for (let i = 0; i < count; i++) {
+    const bx = hash1(seed + i * 3.1) * w, by = hash1(seed + i * 7.7) * h;
+    const ph = hash1(seed + i * 1.3) * Math.PI * 2;
+    const spd = 0.1 + hash1(seed + i * 5.9) * 0.25;
+    const amp = 20 + hash1(seed + i * 9.4) * 60;
+    const x = bx + Math.sin(t * spd + ph) * amp;
+    const y = by + Math.cos(t * spd * 0.8 + ph) * amp * 0.6;
+    g.globalAlpha = 0.10 + hash1(seed + i * 2.3) * 0.25;
+    g.fillStyle = color;
+    g.beginPath(); g.arc(x, y, hash1(seed + i * 4.7) * 12 + 2, 0, Math.PI * 2); g.fill();
+  }
+  g.globalAlpha = 1;
+}
+
+// A full-screen impact word: springs in large and settles, one word per beat. Set the word's
+// font size in CSS; this only drives scale and opacity from t.
+function impactWord(el, t, delay = 0, { from = 2.4 } = {}) {
+  el.style.transform = `scale(${sp(t, delay, spring.snappy, from, 1)})`;
+  el.style.opacity = clamp((t - delay) / 0.12);
+}
+
 // Splits an element's text into word spans; returns them for per-word springs.
 function splitWords(el) {
   const words = el.textContent.trim().split(/\s+/);
