@@ -1,0 +1,38 @@
+<!doctype html>
+<!-- Dopamine loop: Stakes, Big Question, Headfake/Contrast, Rehook. Structure from the
+     Kallaway loop: open with stakes, ask the big question, break the expectation with a
+     contrast, then rehook with a fresh question around two thirds through. The rehook
+     delay below assumes a 6-beat scene at 120 bpm (3 seconds); move REHOOK_T to about
+     65% of the scene length if you change the beats. -->
+<meta charset="utf-8">
+<link rel="stylesheet" href="common.css">
+<body>
+<div id="amb"></div>
+<div id="stakes" class="abs h1" style="left:160px;top:180px;width:1500px">What is at stake.</div>
+<div id="question" class="abs h2" style="left:160px;top:420px;width:1400px">What is the big question?</div>
+<div id="a"></div>
+<div id="b"></div>
+<div id="rehook" class="abs sub" style="left:166px;top:820px;width:1400px">But what if the opposite is true?</div>
+<script src="common.js"></script>
+<script>
+const REHOOK_T = 2.0; // ~65% of a 3-second scene
+const stakesW = splitWords($('stakes'));
+const questionW = splitWords($('question'));
+const rehookW = splitWords($('rehook'));
+const cardA = card($('a'), { w: 700, h: 220, html: '<div class="sub" style="padding:36px">What you expect.</div>' });
+const cardB = card($('b'), { w: 700, h: 220, html: '<div class="sub" style="padding:36px">What actually happens.</div>' });
+window.scene = {
+  sfx: [{ t: 0.2, name: 'pop' }, { t: 0.9, name: 'tick', gain: 0.3 }, { t: 1.6, name: 'whoosh' }, { t: REHOOK_T, name: 'riser' }],
+  render(t, f, ctx) {
+    ambient($('amb'), t);
+    wordsIn(stakesW, t, { delay: 0.2, step: 0.1, rise: 110 });
+    wordsIn(questionW, t, { delay: 0.9, step: 0.09, rise: 60 });
+    // Headfake: the expected card leaves as the contrast card arrives.
+    pos(cardA, 160 + sp(t, 1.6, spring.snappy, 0, -900), 600);
+    cardA.style.opacity = 1 - clamp((t - 1.6) / 0.2);
+    pos(cardB, 160 + sp(t, 1.6, spring.bouncy, 900, 0), 600);
+    cardB.style.opacity = clamp((t - 1.6) / 0.15);
+    wordsIn(rehookW, t, { delay: REHOOK_T, step: 0.08, rise: 40, preset: spring.soft });
+  },
+};
+</script>

@@ -10,7 +10,9 @@ export const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 //
 // project.json fields: bpm, fps, size [w,h], scenes [{file, beats, needs?}],
 // formats {name: [w,h]} (optional extra aspect ratios), captions [{beat, beats, text}],
-// voiceover "file.wav" (optional, mixed under the music).
+// voiceover "file.wav" (optional, mixed under the music), job (optional: one of
+// Storytelling, Relatable, Opinion, Advice — what the film is for, not what it is about).
+export const JOBS = ['Storytelling', 'Relatable', 'Opinion', 'Advice'];
 export function resolveProjectDir(ref) {
   // A project is any directory with a project.json, inside any repo. A bare name also falls back to
   // ./motion/<name> in the current directory and to projects/<name> inside this tool's own folder.
@@ -24,6 +26,7 @@ export function loadProject(ref, { format = null } = {}) {
   const dir = resolveProjectDir(ref);
   const name = dir.split('/').filter(Boolean).pop();
   const cfg = JSON.parse(readFileSync(join(dir, 'project.json'), 'utf8'));
+  if (cfg.job !== undefined && !JOBS.includes(cfg.job)) throw new Error(`project.json job "${cfg.job}" unknown (want ${JOBS.join(', ')})`);
   const fps = cfg.fps ?? 30;
   const beatSec = 60 / cfg.bpm;
   const beatFrames = fps * beatSec;
@@ -47,6 +50,9 @@ export function loadProject(ref, { format = null } = {}) {
     format, baseSize: base, width: size[0], height: size[1],
     scenes, totalFrames: start, seconds: start / fps,
     captions: cfg.captions ?? [],
+    // Optional format job (Storytelling, Relatable, Opinion, Advice). Pure metadata:
+    // nothing renders differently when it is absent or present.
+    job: cfg.job ?? null,
     // project-level sound effects placed by beat, and an optional effect on every cut (e.g. "whoosh")
     sfx: (cfg.sfx ?? []).map((e, k) => {
       const t = e.t ?? (typeof e.beat === 'number' ? e.beat * beatSec : undefined);

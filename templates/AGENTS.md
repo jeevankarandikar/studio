@@ -9,6 +9,7 @@ studio doctor                        # once: checks node, ffmpeg, the browser
 studio lint .                        # motion rules, no browser needed
 studio loop . --first                # render every scene, score them, write out/<name>/report.json
 studio loop .                        # re-render only scenes under 8
+studio gate .                        # stills first, then animatic, then full render — approval in out/<name>/gates/approval.json
 studio sheet . 2                     # 8-frame contact sheet of scene 2 in seconds (out/<name>/preview/)
 studio watch . 2                     # same, again on every save
 studio frame . 2 40                  # one frame as a png
@@ -30,7 +31,8 @@ studio check .                       # same frame twice must be byte-identical
 - No frame may sit still. Use `kick(ctx)` for a spring on every beat and `ambient()` for background drift.
 - Left-aligned layouts. No centered all-caps text on a gradient.
 - Real product screenshots go in `brand/shots/`. List each scene's required files under `needs` in `project.json`.
-- Layout helpers are in `scenes/common.js`: `wordsIn`, `typeText`, `countUp`, `card`, `shotFrame`, `parallax`, `prepPath`/`drawPath`, `kick`, `ambient`.
+- Layout helpers are in `scenes/common.js`: `wordsIn`, `typeText`, `countUp`, `card`, `shotFrame`, `parallax`, `prepPath`/`drawPath`, `kick`, `downbeat` (a kick on bar starts only), `brushStroke` (textured canvas stroke along a path), `orbField` (seeded drifting particle orbs), `impactWord` (a full-screen word that springs in and settles), `ambient`.
+- Structure templates, copied from `templates/` into a project and edited: `prep.html` (PREP: Point, Reason, Explain, Point restated), `loop.html` (dopamine loop: Stakes, Big Question, Headfake/Contrast, Rehook around 65%), `silent.html` (silent-film: struggle hook, payoff-promising timestamp, transformation beat, on-screen text only), `impact.html` (impact text: one full-screen word per beat, one sound per word). `title.html`, `shot.html` and `close.html` are the ones `studio init` scaffolds.
 
 ## Sound
 
