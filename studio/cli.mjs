@@ -8,6 +8,7 @@ import { render } from './render.mjs';
 import { capture } from './capture.mjs';
 import { lintProject } from './lint.mjs';
 import { runLoop } from './critique/loop.mjs';
+import { gateRun } from './critique/gates.mjs';
 import { scoreProject } from './critique/score.mjs';
 import { writeBrief, runAuto, writeMuteBrief, runMute } from './critique/review.mjs';
 import { verify, summary, hasFullReview } from './verify.mjs';
@@ -22,6 +23,8 @@ const HELP = `studio render <project> [--scene N ...] [--format name] [--workers
 studio loop <project> [--first] [--target 8] [--review] [--format name]
 studio lint <project>
 studio frame <project> <scene> <frame> [--format name]     one frame to out/<tag>/preview/
+studio gate <project> [--approve 0,1] [--reject 2] [--approve-animatic] [--restill]
+                                                         stills, then animatic, then full render — approval in out/<tag>/gates/approval.json
 studio sheet <project> <scene> [--format name]             8-frame contact sheet in a few seconds
 studio watch <project> <scene>                             re-make the sheet whenever the scene file changes
 studio review <project> [--auto] [--mute]                  reviewer brief (sheets, cut strips, peak strips), or run it through claude -p; --mute is the no-sound test
@@ -37,7 +40,7 @@ studio list`;
 const argv = process.argv.slice(2).flatMap((a) => (/^--[\w-]+=/.test(a) ? [a.slice(0, a.indexOf('=')), a.slice(a.indexOf('=') + 1)] : [a]));
 const cmd = argv[0];
 const rest = argv.slice(1);
-const pos = rest.filter((a, i) => !a.startsWith('--') && !(i > 0 && ['--format', '--target', '--workers', '--scene', '--brand-from'].includes(rest[i - 1])));
+const pos = rest.filter((a, i) => !a.startsWith('--') && !(i > 0 && ['--format', '--target', '--workers', '--scene', '--brand-from', '--approve', '--reject'].includes(rest[i - 1])));
 const flag = (n) => rest.includes(n);
 const val = (n) => (rest.includes(n) ? rest[rest.indexOf(n) + 1] : undefined);
 const all = (n) => rest.reduce((a, x, i) => (x === n ? [...a, rest[i + 1]] : a), []);
@@ -81,6 +84,15 @@ try {
     case 'render': {
       const scenes = all('--scene').map((v) => int('scene', v));
       await render(pos[0] ?? need('project'), { scenes: scenes.length ? scenes : null, doStitch: !flag('--no-stitch'), format: val('--format') ?? null, workers: flag('--workers') ? int('workers', val('--workers'), 1) : undefined });
+      break;
+    }
+    case 'gate': {
+      await gateRun(pos[0] ?? need('project'), {
+        approve: rest.includes('--approve') ? val('--approve') : null,
+        reject: rest.includes('--reject') ? val('--reject') : null,
+        approveAnimatic: flag('--approve-animatic'),
+        restill: flag('--restill'),
+      });
       break;
     }
     case 'loop': {
