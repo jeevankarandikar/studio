@@ -6,20 +6,63 @@ import { join } from 'node:path';
 import { frameDeltas, deadRuns, sceneMotion } from './deadframes.mjs';
 import { lintScene } from '../lint.mjs';
 
-// One contact sheet per scene: 8 evenly spaced frames, downscaled, for the reviewer to read.
-export function contactSheet(project, scene) {
+// Tiles exactly the listed frames (0-based global frame numbers, ascending, distinct) into one image. Picking by
+// explicit frame number means the sheet always covers the whole span asked for, never just its first rows.
+function tileFrames(project, name, frames, cols, rows, width) {
   const dir = join(project.out, 'sheets');
   mkdirSync(dir, { recursive: true });
-  const file = join(dir, `scene-${scene.index}.jpg`);
-  const step = Math.max(1, Math.floor(scene.frames / 8));
-  const sel = `select='not(mod(n\\,${step}))*gte(n\\,${scene.start})*lt(n\\,${scene.start + scene.frames})'`;
+  const file = join(dir, `${name}.jpg`);
+  const sel = frames.map((n) => `eq(n\\,${n})`).join('+');
   const r = spawnSync('ffmpeg', [
     '-y', '-loglevel', 'error', '-framerate', String(project.fps), '-start_number', '1', '-i', join(project.framesDir, '%05d.png'),
-    '-vf', `${sel},scale=480:-1,tile=4x2`, '-frames:v', '1', '-q:v', '4', file,
-  ]);
-  if (r.status !== 0) throw new Error(`contact sheet for scene ${scene.index} failed: ${String(r.stderr).split('\n')[0]}`);
+    '-vf', `select='${sel}',scale=${width}:-1,tile=${cols}x${rows}`, '-frames:v', '1', '-q:v', '4', file,
+  ], { encoding: 'utf8' });
+  if (r.status !== 0) throw new Error(`${name} failed: ${String(r.stderr).split('\n')[0]}`);
   return file;
 }
+
+// n frames spread evenly from `from` for `span` frames, distinct and ascending even when span < n.
+function spread(from, span, n) {
+  const out = [];
+  for (let i = 0; i < n; i++) {
+    const f = from + Math.min(span - 1, Math.floor((i * span) / n));
+    if (!out.includes(f)) out.push(f);
+  }
+  return out;
+}
+
+// One contact sheet per scene: 8 evenly spaced frames, downscaled, for the reviewer to read.
+export function contactSheet(project, scene) {
+  return tileFrames(project, `scene-${scene.index}`, spread(scene.start, scene.frames, 8), 4, 2, 480);
+}
+
+// Consecutive frames, not spread-out ones: 5 before and 5 after a cut shows whether the hand-off is clean,
+// and 10 in a row around a frame shows how a fast move actually travels.
+function strip(project, name, centerFrame) {
+  const from = Math.max(0, Math.min(project.totalFrames - 10, centerFrame - 5));
+  const file = tileFrames(project, name, Array.from({ length: 10 }, (_, i) => from + i), 5, 2, 384);
+  return { file, from, to: from + 9 };
+}
+
+export function cutStrips(project) {
+  return project.scenes.slice(1).map((s) => ({ cut: s.index, ...strip(project, `cut-${s.index}`, s.start) }));
+}
+
+// The fastest-moving moment in each scene, shown as 10 consecutive frames.
+export function motionStrips(project, deltas) {
+  return project.scenes.map((s) => {
+    let best = s.start + 1, top = -1;
+    for (let i = s.start + 5; i < s.start + s.frames - 5; i++) if (deltas[i] > top) { top = deltas[i]; best = i; }
+    return { scene: s.index, ...strip(project, `peak-${s.index}`, best) };
+  });
+}
+
+// One sheet for the whole film, for a reviewer who is not allowed to hear it.
+export function filmSheet(project) {
+  return tileFrames(project, 'film', spread(0, project.totalFrames, 12), 4, 3, 480);
+}
+
+export { frameDeltas };
 
 export function scoreProject(project) {
   const deltas = frameDeltas(project);

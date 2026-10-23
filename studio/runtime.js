@@ -12,7 +12,7 @@
       el.id = '__captions';
       el.style.cssText = 'position:fixed;left:0;right:0;bottom:6%;display:flex;justify-content:flex-start;padding-left:8%;pointer-events:none;z-index:9999;';
       const pill = document.createElement('div');
-      pill.style.cssText = 'font:500 44px/1.2 var(--display,Georgia,serif);color:var(--paper,#fff);background:var(--ink,#111);padding:14px 28px;border-radius:14px;max-width:80%;will-change:transform,opacity;';
+      pill.style.cssText = 'font:500 44px/1.2 var(--display,Georgia,serif);color:var(--paper,#fff);background:var(--ink,#111);padding:14px 28px;border-radius:14px;max-width:80%;';
       el.appendChild(pill);
       document.body.appendChild(el);
     }

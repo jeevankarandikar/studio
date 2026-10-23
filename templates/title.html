@@ -12,6 +12,8 @@
 const nameW = splitWords($('name'));
 const tagW = splitWords($('tag'));
 window.scene = {
+  // sound events, in seconds from the scene start: place each next to the visual it belongs to
+  sfx: [{ t: 0.25, name: 'pop' }, { t: 1.0, name: 'swipe' }],
   render(t, f, ctx) {
     ambient($('amb'), t);
     const K = kick(ctx) * clamp((t - 1.0) / 0.2);

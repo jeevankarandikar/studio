@@ -5,6 +5,8 @@ import { lintProject } from './lint.mjs';
 import { capture } from './capture.mjs';
 import { synth } from './audio/synth.mjs';
 import { stitch } from './stitch.mjs';
+import { verify, summary, hasFullReview } from './verify.mjs';
+import { validateEvent } from './audio/sfx.mjs';
 
 // The frame files only make sense for one layout of scenes. If scene lengths, order or size changed since the
 // last render, or frames are missing, re-rendering a subset would stitch shifted or absent footage.
@@ -18,6 +20,8 @@ function needsFullRender(project) {
   if (readFileSync(manifest, 'utf8') !== layoutSignature(project)) return 'scene layout changed';
   const have = readdirSync(project.framesDir).filter((f) => /^\d{5}\.png$/.test(f)).length;
   if (have < project.totalFrames) return `only ${have} of ${project.totalFrames} frames on disk`;
+  const noSfx = project.scenes.filter((s) => !existsSync(join(project.framesDir, `sfx-${s.index}.json`)));
+  if (noSfx.length) return `sound events not recorded for scene ${noSfx.map((s) => s.index).join(', ')}`;
   return null;
 }
 
@@ -59,8 +63,22 @@ export async function render(name, { scenes = null, doStitch = true, format = nu
   await capture(project, brand, idx, { workers });
   writeFileSync(join(project.framesDir, 'manifest.json'), layoutSignature(project));
   if (!doStitch) return { project };
-  const wav = synth(project, join(project.out, 'score.wav'));
+  // Sound effects: the ones the project lists by beat, plus the ones each scene declared while it was captured.
+  const events = [...project.sfx];
+  for (const s of project.scenes) {
+    const f = join(project.framesDir, `sfx-${s.index}.json`);
+    if (!existsSync(f)) continue;
+    JSON.parse(readFileSync(f, 'utf8')).forEach((e, k) => {
+      const where = `scene ${s.index} (${s.file.split('/').pop()}) sfx[${k}]`;
+      validateEvent(e, where, s.frames / project.fps);
+      events.push({ ...e, t: s.start / project.fps + e.t, where });
+    });
+  }
+  const placed = [];
+  const wav = synth(project, join(project.out, 'score.wav'), { events, placed });
   const mp4 = stitch(project, wav);
-  console.log(`wrote ${mp4} (${project.seconds}s, ${project.totalFrames} frames, ${project.width}x${project.height})`);
-  return { project, mp4 };
+  console.log(`wrote ${mp4} (${project.seconds}s, ${project.totalFrames} frames, ${project.width}x${project.height}, ${placed.length} sound effects)`);
+  const m = verify(project, { sfxPlaced: placed, hasReview: hasFullReview(project) });
+  console.log(summary(m));
+  return { project, mp4, manifest: m };
 }

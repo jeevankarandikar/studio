@@ -12,7 +12,10 @@ studio loop .                        # re-render only scenes under 8
 studio sheet . 2                     # 8-frame contact sheet of scene 2 in seconds (out/<name>/preview/)
 studio watch . 2                     # same, again on every save
 studio frame . 2 40                  # one frame as a png
-studio review . --auto               # fresh-context reviewer scores the contact sheets
+studio review . --auto               # fresh-context reviewer scores contact sheets, cut strips and peak-motion strips
+studio review . --mute --auto        # mute test: a judge sees the film with no sound and says what it understood
+studio verify .                      # loudness, size, first and last frame; writes out/<name>/manifest.json
+studio sfx --all                     # write every sound effect to ./sfx-audition/ to listen
 studio render . --format vertical    # 1080x1920 (square is 1080x1080)
 studio export .                      # web mp4, webm, poster and gif in out/<name>/web/
 studio check .                       # same frame twice must be byte-identical
@@ -28,6 +31,15 @@ studio check .                       # same frame twice must be byte-identical
 - Left-aligned layouts. No centered all-caps text on a gradient.
 - Real product screenshots go in `brand/shots/`. List each scene's required files under `needs` in `project.json`.
 - Layout helpers are in `scenes/common.js`: `wordsIn`, `typeText`, `countUp`, `card`, `shotFrame`, `parallax`, `prepPath`/`drawPath`, `kick`, `ambient`.
+
+## Sound
+
+Audio is synthesized. A score is built from the bpm. Sound effects come from `studio sfx` (run it to list them, `studio sfx --all` to write them to `./sfx-audition/` and listen): click, key, type, tick, pop, whoosh, swipe, settle, thud, hit, riser, chime, success, error, blip, shutter.
+
+- A scene declares its sounds next to its visuals: `window.scene.sfx = [{ t: 0.25, name: 'pop' }]`, with `t` in seconds from the scene start and an optional `gain` (default 0.5). Use the same delay constants that place the visual, so moving a visual moves its sound.
+- `type` is a burst of keystrokes: `{ t: 0.6, name: 'type', dur: 1.3, cps: 28 }` for a typing field that types at 28 characters a second.
+- `project.json` can set `"cutSfx": "whoosh"` for a sound just before every cut, and `"sfx": [{ "beat": 4, "name": "riser" }]` for sounds placed by beat.
+- Fewer sounds, each earning its place. One sound per visual event that matters. Never put a sound on every word.
 
 ## The loop
 

@@ -4,7 +4,7 @@ A toolbox that turns HTML scenes into motion videos, for any repo, project or pr
 
 Scenes are plain HTML, CSS and JavaScript. Playwright captures every frame in headless Chrome, FFmpeg stitches the frames with a synthesized score into an MP4, and a critique loop scores each scene and flags the weak ones.
 
-Other tools do part of this: [HyperFrames](https://github.com/heygen-com/hyperframes) renders HTML to video for agents, and Remotion, Motion Canvas and Revideo are code-first video frameworks. This one adds a fixed motion rule set (closed-form springs, no CSS transitions) and the score-and-review loop.
+Related work: [HyperFrames](https://github.com/heygen-com/hyperframes) renders HTML to video for agents, Remotion, Motion Canvas and Revideo are code-first video frameworks, and [cstack](https://github.com/goodnight000/cstack) is a set of agent skills for reels. The review loop (strips around cuts, a mute test, a measured-versus-not-measured report) follows ideas from cstack. This tool adds a fixed motion rule set (closed-form springs, no CSS transitions), synthesized sound and the scoring loop.
 
 ## Install
 
@@ -44,7 +44,9 @@ The project folder carries its own `AGENTS.md` with the scene rules and commands
 | `studio watch <project> <scene>` | rebuild the sheet on every save |
 | `studio frame <project> <scene> <frame>` | one frame as a PNG |
 | `studio lint <project>` | motion rules, no browser needed |
-| `studio review <project> [--auto]` | reviewer brief, or run it through `claude -p` |
+| `studio review <project> [--auto] [--mute]` | reviewer brief (sheets, cut strips, peak strips), or run it through `claude -p`; `--mute` is the no-sound test |
+| `studio verify <project>` | measure the render (loudness, size, first and last frame) and write `manifest.json` |
+| `studio sfx [name \| --all]` | list the sound effects, or write them to `./sfx-audition/` to listen |
 | `studio export <project>` | web MP4, WebM, poster and GIF |
 | `studio check <project>` | same frame twice must be byte-identical |
 | `studio doctor` | diagnose the environment |
@@ -68,12 +70,32 @@ The render refuses to run until the brand pack loads: palette, at least one font
 - Time only comes from `render(t, frame, ctx)`. Lint rejects `Date`, `setTimeout`, `requestAnimationFrame` and `Math.random`.
 - Motion is a closed-form damped spring, `spring(t - delay, { from, to, k, c, m })`, never an easing curve. Lint rejects CSS `transition`, `animation`, `@keyframes` and easing keywords.
 - Scene lengths are in beats, so cuts land on the beat. 120 bpm at 30 fps gives 15 whole frames per beat.
-- Audio is synthesized from the bpm; there is no stock music.
+- Audio is synthesized: a score from the bpm and a library of sound effects (click, key, type, tick, pop, whoosh, swipe, settle, thud, hit, riser, chime, success, error, blip, shutter). There is no stock audio and nothing to license. Scenes declare their own sounds in `window.scene.sfx`, from the same constants that place the visuals.
 - No centered all-caps text on a gradient.
 
 ## Scoring and review
 
 Each scene starts at 10. Points come off for dead frames (8 or more near-identical frames in a row), low motion density, a cut off the beat and lint hits. `studio review --auto` hands the contact sheets and `studio/critique/rubric.md` to a fresh-context model that sees nothing of how the scenes were built, and its score can only lower the mechanical one. Every scene needs 8 or more.
+
+## Sound effects
+
+`studio sfx --all` writes every effect to `./sfx-audition/` so you can listen. A scene places sounds next to its visuals:
+
+```js
+window.scene = {
+  sfx: [
+    { t: 0.6, name: 'type', dur: 1.3, cps: 28 },   // keystrokes for a typing field
+    { t: 1.25, name: 'tick', gain: 0.35 },
+  ],
+  render(t, f, ctx) { /* ... */ },
+};
+```
+
+`project.json` can add `"cutSfx": "whoosh"` for a sound before every cut and `"sfx": [{ "beat": 4, "name": "riser" }]` for sounds placed by beat. The music is levelled first and effects sit on top, then a soft limiter and a final loudness pass to -16 LUFS with a -1.5 dB true-peak ceiling.
+
+## Checks on a finished render
+
+`studio verify` measures duration, size, frame rate, audio track, integrated loudness, true peak, and the first and last frame, and writes `out/<name>/manifest.json` with the tool versions, a hash of the project, scenes and brand files, the effects mixed in, and two lists: what was measured and what was not. The review brief adds consecutive-frame strips around each cut and at each scene's fastest moment. `studio review --mute` shows a judge the film with the sound off and asks what it understood.
 
 ## Formats and delivery
 

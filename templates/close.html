@@ -12,6 +12,7 @@
 const urlW = splitWords($('url'));
 const subW = splitWords($('sub'));
 window.scene = {
+  sfx: [{ t: 0.1, name: 'hit', gain: 0.4 }, { t: 1.0, name: 'chime' }],
   render(t, f, ctx) {
     ambient($('amb'), t);
     const K = kick(ctx) * clamp((t - 1.0) / 0.2); // every beat the layout answers the music

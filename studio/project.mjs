@@ -1,6 +1,7 @@
 import { readFileSync, existsSync, readdirSync } from 'node:fs';
 import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { validateEvent } from './audio/sfx.mjs';
 
 export const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -46,6 +47,13 @@ export function loadProject(ref, { format = null } = {}) {
     format, baseSize: base, width: size[0], height: size[1],
     scenes, totalFrames: start, seconds: start / fps,
     captions: cfg.captions ?? [],
+    // project-level sound effects placed by beat, and an optional effect on every cut (e.g. "whoosh")
+    sfx: (cfg.sfx ?? []).map((e, k) => {
+      const t = e.t ?? (typeof e.beat === 'number' ? e.beat * beatSec : undefined);
+      validateEvent({ ...e, t }, `project.json sfx[${k}]`, start / fps);
+      return { ...e, t, where: `project.json sfx[${k}]` };
+    }),
+    cutSfx: cfg.cutSfx ?? null,
     voiceover: cfg.voiceover ? join(dir, cfg.voiceover) : null,
     formats: cfg.formats ?? {},
     // Output lives inside the project, so every repo keeps its own renders. `studio init` gitignores both.

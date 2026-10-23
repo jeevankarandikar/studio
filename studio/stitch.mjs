@@ -12,14 +12,16 @@ export function stitch(project, wav) {
   mkdirSync(project.out, { recursive: true });
   const out = join(project.out, `${project.tag}.mp4`);
   const vo = project.voiceover && existsSync(project.voiceover) ? project.voiceover : null;
+  // Final loudness is levelled to -16 LUFS with a -1.5 dB true-peak ceiling (the usual level for web video).
+  const LEVEL = 'loudnorm=I=-16:TP=-1.5:LRA=11';
   const audio = vo
-    ? ['-i', wav, '-i', vo, '-filter_complex', '[1:a]volume=0.35[m];[2:a]volume=1.0[v];[m][v]amix=inputs=2:duration=first:normalize=0[a]', '-map', '0:v', '-map', '[a]']
-    : ['-i', wav];
+    ? ['-i', wav, '-i', vo, '-filter_complex', `[1:a]volume=0.35[m];[2:a]volume=1.0[v];[m][v]amix=inputs=2:duration=first:normalize=0,${LEVEL}[a]`, '-map', '0:v', '-map', '[a]']
+    : ['-i', wav, '-af', LEVEL];
   ff([
     '-framerate', String(project.fps), '-start_number', '1', '-i', join(project.framesDir, '%05d.png'),
     ...audio,
     '-c:v', 'libx264', '-crf', '16', '-pix_fmt', 'yuv420p', '-preset', 'medium',
-    '-c:a', 'aac', '-b:a', '192k', '-shortest', '-movflags', '+faststart', out,
+    '-c:a', 'aac', '-b:a', '192k', '-ar', '48000', '-shortest', '-movflags', '+faststart', out,
   ]);
   return out;
 }

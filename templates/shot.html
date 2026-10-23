@@ -12,6 +12,7 @@
 const words = splitWords($('head'));
 const frame = shotFrame($('stage'), '../brand/shots/{{SHOT}}', { w: 1060, h: 700, title: {{SHOT_TITLE_JS}} });
 window.scene = {
+  sfx: [{ t: 0.3, name: 'settle' }, { t: 1.0, name: 'tick', gain: 0.3 }],
   render(t, f, ctx) {
     ambient($('amb'), t);
     wordsIn(words, t, { delay: 0.1, step: 0.08 });

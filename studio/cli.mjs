@@ -9,7 +9,10 @@ import { capture } from './capture.mjs';
 import { lintProject } from './lint.mjs';
 import { runLoop } from './critique/loop.mjs';
 import { scoreProject } from './critique/score.mjs';
-import { writeBrief, runAuto } from './critique/review.mjs';
+import { writeBrief, runAuto, writeMuteBrief, runMute } from './critique/review.mjs';
+import { verify, summary, hasFullReview } from './verify.mjs';
+import { renderSfx, SFX_NAMES } from './audio/sfx.mjs';
+import { writeWav } from './audio/synth.mjs';
 import { exportWeb } from './stitch.mjs';
 import { doctor } from './doctor.mjs';
 import { determinism } from './check.mjs';
@@ -21,7 +24,9 @@ studio lint <project>
 studio frame <project> <scene> <frame> [--format name]     one frame to out/<tag>/preview/
 studio sheet <project> <scene> [--format name]             8-frame contact sheet in a few seconds
 studio watch <project> <scene>                             re-make the sheet whenever the scene file changes
-studio review <project> [--auto]                           reviewer brief, or run it through claude -p
+studio review <project> [--auto] [--mute]                  reviewer brief (sheets, cut strips, peak strips), or run it through claude -p; --mute is the no-sound test
+studio verify <project>                                    measure the render: loudness, size, first and last frame; writes manifest.json
+studio sfx [name | --all]                                  list the sound effects, or write them to ./sfx-audition/ to listen
 studio export <project> [--format name]                    web mp4, webm, poster and gif in out/<tag>/web/
 studio check <project> [--format name]                     determinism: same frame twice, byte-identical
 studio init [dir]                                          in the repo you are in: make ./motion (or dir), fill the brand pack from the repo
@@ -132,11 +137,39 @@ try {
     }
     case 'review': {
       const name = pos[0] ?? need('project');
-      const project = loadProject(name);
+      const project = loadProject(name, { format: val('--format') ?? null });
+      if (flag('--mute')) {
+        const brief = writeMuteBrief(project);
+        console.log(`brief: ${brief}`);
+        if (flag('--auto')) console.log(JSON.stringify(runMute(project, brief), null, 2));
+        break;
+      }
       const scores = scoreProject(project);
       const brief = writeBrief(project, scores);
       console.log(`brief: ${brief}`);
       if (flag('--auto')) console.log(JSON.stringify(runAuto(project, brief), null, 2));
+      break;
+    }
+    case 'verify': {
+      const project = loadProject(pos[0] ?? need('project'), { format: val('--format') ?? null });
+      const m = verify(project, { hasReview: hasFullReview(project) });
+      console.log(summary(m));
+      console.log(`manifest: ${join(project.out, 'manifest.json')}`);
+      process.exitCode = m.measured.every((c) => c.ok) ? 0 : 1;
+      break;
+    }
+    case 'sfx': {
+      // studio sfx            lists the library
+      // studio sfx <name>     writes it to a wav in ./sfx-audition so you can hear it
+      // studio sfx --all      writes every sound
+      const dir = join(process.cwd(), 'sfx-audition');
+      const names = flag('--all') ? SFX_NAMES : pos[0] ? [pos[0]] : null;
+      if (!names) { console.log(SFX_NAMES.join('\n')); break; }
+      for (const n of names) {
+        const file = join(dir, `${n}.wav`);
+        writeWav(file, renderSfx(n, n === 'type' ? { dur: 1.2, cps: 13 } : {}));
+        console.log(file);
+      }
       break;
     }
     case 'export': {

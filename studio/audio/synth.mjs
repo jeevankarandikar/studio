@@ -3,13 +3,16 @@
 // a soft pad, and an accent hit on every scene cut.
 import { writeFileSync, mkdirSync } from 'node:fs';
 import { dirname } from 'node:path';
+import { renderSfx, validateEvent } from './sfx.mjs';
 
 const SR = 44100;
 
 function lcg(seed) { let s = seed >>> 0; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296) * 2 - 1; }
 const midi = (n) => 440 * 2 ** ((n - 69) / 12);
 
-export function synth(project, file) {
+// opts.events: extra sound effects [{t, name, gain?}] in seconds from the start of the film.
+// opts.placed: an array that receives the list of effects that were mixed in.
+export function synth(project, file, opts = {}) {
   const total = Math.round(project.seconds * SR);
   const buf = new Float32Array(total);
   const add = (t0, len, fn) => {
@@ -44,26 +47,58 @@ export function synth(project, file) {
       });
     }
   }
-  // cut accents land exactly on scene starts
-  for (const s of project.scenes) {
-    const t = s.start / project.fps;
-    add(t, 0.5, (x) => (Math.sin(2 * Math.PI * 880 * x) * 0.6 + rnd() * 0.4) * Math.exp(-x * 14) * 0.25);
+  // cut accents land exactly on scene starts, unless the project names a sound effect for cuts
+  if (!project.cutSfx) {
+    for (const s of project.scenes) {
+      const t = s.start / project.fps;
+      add(t, 0.5, (x) => (Math.sin(2 * Math.PI * 880 * x) * 0.6 + rnd() * 0.4) * Math.exp(-x * 14) * 0.25);
+    }
   }
 
+  // The music is levelled on its own first, so sound effects sit on top of it at a known loudness
+  // instead of being squashed by whatever happens to be loudest in the mix.
   let peak = 0;
   for (const v of buf) peak = Math.max(peak, Math.abs(v));
-  const g = peak > 0 ? 0.89 / peak : 1;
+  const musicGain = peak > 0 ? 0.55 / peak : 1;
+  for (let i = 0; i < total; i++) buf[i] *= musicGain;
+
+  const placed = [];
+  const events = [...(opts.events ?? [])];
+  if (project.cutSfx) {
+    validateEvent({ t: 0, name: project.cutSfx }, 'project.json cutSfx', 0);
+    for (const s of project.scenes.slice(1)) events.push({ t: s.start / project.fps - 0.12, name: project.cutSfx, gain: 0.5, cut: true });
+  }
+  for (const ev of events) {
+    const t0 = ev.t;
+    if (!Number.isFinite(t0)) throw new Error(`${ev.where ?? 'sound event'}: t is not a number`);
+    const sound = renderSfx(ev.name, ev);
+    const a = Math.round(t0 * SR), g = ev.gain ?? 0.5;
+    let wrote = 0;
+    for (let i = 0; i < sound.length; i++) {
+      const j = a + i;
+      if (j >= 0 && j < total && Math.abs(sound[i]) > 1e-4) { buf[j] += sound[i] * g; wrote++; }
+    }
+    // Only effects that put real samples in the film are listed. One in the last 0.4 s sits under the end fade.
+    if (wrote > 0 && t0 < project.seconds - 0.4) placed.push({ t: Math.round(t0 * 1000) / 1000, name: ev.name });
+  }
+  opts.placed?.push(...placed);
+
+  // soft limiter so stacked sounds never clip, then a short fade at the end
   const fade = Math.round(0.4 * SR);
+  const out = new Float32Array(total);
+  for (let i = 0; i < total; i++) out[i] = Math.tanh(buf[i] * 1.05) * 0.95 * Math.min(1, (total - i) / fade);
+  writeWav(file, out);
+  return file;
+}
+
+export function writeWav(file, samples) {
+  const total = samples.length;
   const pcm = Buffer.alloc(44 + total * 2);
   pcm.write('RIFF', 0); pcm.writeUInt32LE(36 + total * 2, 4); pcm.write('WAVEfmt ', 8);
   pcm.writeUInt32LE(16, 16); pcm.writeUInt16LE(1, 20); pcm.writeUInt16LE(1, 22);
   pcm.writeUInt32LE(SR, 24); pcm.writeUInt32LE(SR * 2, 28); pcm.writeUInt16LE(2, 32); pcm.writeUInt16LE(16, 34);
   pcm.write('data', 36); pcm.writeUInt32LE(total * 2, 40);
-  for (let i = 0; i < total; i++) {
-    const tail = Math.min(1, (total - i) / fade);
-    pcm.writeInt16LE(Math.max(-32767, Math.min(32767, Math.round(buf[i] * g * tail * 32767))), 44 + i * 2);
-  }
+  for (let i = 0; i < total; i++) pcm.writeInt16LE(Math.max(-32767, Math.min(32767, Math.round(samples[i] * 32767))), 44 + i * 2);
   mkdirSync(dirname(file), { recursive: true });
   writeFileSync(file, pcm);
-  return file;
 }

@@ -139,6 +139,7 @@ export function scaffold(dirArg = 'motion', { repo = process.cwd() } = {}) {
   writeFileSync(join(dir, 'project.json'), JSON.stringify({
     bpm: 120, fps: 30, size: [1920, 1080],
     formats: { vertical: [1080, 1920], square: [1080, 1080] },
+    cutSfx: 'whoosh',
     scenes: plan.map((s) => ({ file: s.out, beats: 6, ...(s.needs ? { needs: s.needs } : {}) })),
     captions: [],
   }, null, 2) + '\n');

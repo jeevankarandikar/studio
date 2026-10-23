@@ -1,13 +1,13 @@
 /* Base for scenes. Colors come from the brand pack as CSS variables (--paper, --ink, --accent, ...). */
 html,body{margin:0;width:1920px;height:1080px;overflow:hidden;background:var(--paper,#fff);color:var(--ink,#111);}
 body{font-family:var(--display,"Georgia",serif);position:relative;}
-.abs{position:absolute;will-change:transform,opacity;}
+.abs{position:absolute;}
 .mono{font-family:var(--mono,ui-monospace,monospace);}
 .h1{font-weight:500;font-size:132px;line-height:1.02;letter-spacing:-0.02em;}
 .h2{font-weight:500;font-size:96px;line-height:1.05;letter-spacing:-0.018em;}
 .sub{font-weight:400;font-size:44px;line-height:1.3;}
 .label{font-size:22px;letter-spacing:0.02em;color:var(--muted,#666);}
-.word{display:inline-block;will-change:transform,opacity;}
+.word{display:inline-block;}
 .rule{position:absolute;height:2px;background:var(--rule,rgba(0,0,0,.16));transform-origin:left center;}
 .vrule{position:absolute;width:2px;background:var(--rule,rgba(0,0,0,.16));transform-origin:center top;}
 .card{background:var(--card,#fff);box-shadow:0 1px 0 var(--rule,rgba(0,0,0,.12)),0 18px 40px rgba(0,0,0,.10);display:flex;align-items:center;justify-content:center;}
