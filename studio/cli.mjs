@@ -32,7 +32,7 @@ studio verify <project>                                    measure the render: l
 studio sfx [name | --all]                                  list the sound effects, or write them to ./sfx-audition/ to listen
 studio export <project> [--format name]                    web mp4, webm, poster and gif in out/<tag>/web/
 studio check <project> [--format name]                     determinism: same frame twice, byte-identical
-studio init [dir]                                          in the repo you are in: make ./motion (or dir), fill the brand pack from the repo
+studio init [dir] [--brand-from <tokens.json|theme.css|dir>]  in the repo you are in: make ./motion (or dir), fill the brand pack from the repo and/or the brand source (video refs become poster frames)
 studio doctor                                              diagnose node, ffmpeg and the browser
 studio list`;
 
@@ -196,14 +196,14 @@ try {
       break;
     case 'init':
     case 'new':
-      console.log(scaffold(pos[0] ?? 'motion'));
+      console.log(scaffold(pos[0] ?? 'motion', { brandFrom: val('--brand-from') ?? null }));
       break;
     case 'doctor':
       await doctor();
       break;
     case 'list': {
       const found = new Set();
-      for (const base of [process.cwd(), join(process.cwd(), 'motion')]) {
+      for (const base of [process.cwd(), join(process.cwd(), 'motion'), join(ROOT, 'projects')]) {
         if (!existsSync(base)) continue;
         if (existsSync(join(base, 'project.json'))) found.add(base);
         for (const p of readdirSync(base)) if (existsSync(join(base, p, 'project.json'))) found.add(join(base, p));

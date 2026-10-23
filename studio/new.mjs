@@ -1,9 +1,16 @@
-// studio init [dir]  (default ./motion)
+// studio init [dir] [--brand-from <tokens.json | theme.css | design-system-dir>]
 // Sets up a video project inside the repo you are standing in and looks around the repo for a logo,
 // fonts, colors and reference images so the brand pack starts filled in. It reports what it found
 // and what is still missing; nothing is invented.
+// --brand-from adds brand sources alongside the repo scan: a design-tokens JSON file (colors,
+// fonts), a CSS file with custom properties, or a folder — a site/app repo, an exported asset
+// folder, or a folder of reference images and videos. For a video reference, ffmpeg extracts a
+// poster frame into brand/refs/ so the two-reference-frames gate still works. A website or an
+// app as input means pointing at that site/app's repo or exported assets; there is no live web
+// scraping and no Figma API here, by design.
 import { existsSync, mkdirSync, readFileSync, writeFileSync, readdirSync, lstatSync, copyFileSync } from 'node:fs';
 import { join, basename, extname, resolve, relative } from 'node:path';
+import { spawnSync } from 'node:child_process';
 import { ROOT } from './project.mjs';
 
 const SKIP = new Set(['node_modules', '.git', 'dist', 'build', '.next', '.nuxt', 'out', '.frames', 'target', 'vendor', '.venv', 'venv', '__pycache__', 'Pods', 'DerivedData', 'motion']);
@@ -85,13 +92,126 @@ export function discover(repo) {
   return { logo, fonts, palette, refs, shots, name, tagline };
 }
 
+// --- --brand-from sources -------------------------------------------------
+// Palette roles, by token/variable name. Whole-word-ish matching only, the same
+// way discover() matches CSS variables, so "foreground" never counts as a background.
+const ROLE = (k) => {
+  const n = k.toLowerCase().replace(/^--/, '');
+  if (/^(paper|background|bg|surface|canvas)$/.test(n) || /(^|-)(paper|surface|canvas)$/.test(n)) return 'paper';
+  if (/^(ink|foreground|fg|text|on-surface)$/.test(n) || /(^|-)(foreground|fg|text)$/.test(n)) return 'ink';
+  if (/^(accent|primary|brand)$/.test(n) || /(^|-)(accent|primary|brand)$/.test(n)) return 'accent';
+  if (/^muted$/.test(n)) return 'muted';
+  if (/^card$/.test(n)) return 'card';
+  return null;
+};
+const hexVal = (v) => {
+  if (typeof v === 'string' && /^#[0-9a-fA-F]{3,6}$/.test(v.trim())) return norm(v.trim());
+  if (v && typeof v === 'object' && typeof v.$value === 'string' && /^#[0-9a-fA-F]{3,6}$/.test(v.$value.trim())) return norm(v.$value.trim());
+  return null;
+};
+function tokensPalette(obj, depth = 0, found = {}) {
+  if (!obj || typeof obj !== 'object' || depth > 4) return found;
+  for (const [k, v] of Object.entries(obj)) {
+    const h = hexVal(v);
+    if (h) { const r = ROLE(k); if (r && !(r in found)) found[r] = h; continue; }
+    tokensPalette(v, depth + 1, found);
+  }
+  return found;
+}
+function parseTokensFile(text) {
+  let obj;
+  try { obj = JSON.parse(text); } catch { return null; }
+  if (!obj || typeof obj !== 'object') return null;
+  const palette = {};
+  // A nested colors/color object wins over stray same-named keys at the root.
+  for (const src of [obj, obj.tokens, obj.color, obj.colors]) Object.assign(palette, tokensPalette(src));
+  const families = [];
+  const grab = (v) => {
+    if (typeof v === 'string' && v.trim()) families.push(v.trim());
+    else if (Array.isArray(v)) v.forEach(grab);
+    else if (v && typeof v === 'object') Object.values(v).forEach(grab);
+  };
+  grab(obj.fonts); grab(obj.fontFamily); grab(obj.font);
+  return { palette, families: [...new Set(families)] };
+}
+function cssVarsPalette(text) {
+  const vars = {};
+  for (const m of text.matchAll(/--([a-z0-9-]+)\s*:\s*(#[0-9a-fA-F]{3,6})\s*;/g)) if (!(m[1] in vars)) vars[m[1]] = norm(m[2]);
+  const found = {};
+  for (const [k, v] of Object.entries(vars)) { const r = ROLE(k); if (r && !(r in found)) found[r] = v; }
+  return found;
+}
+const VIDEO_EXT = /\.(mp4|mov|webm|mkv)$/i;
+function walkVideos(dir, depth, out) {
+  if (depth < 0) return out;
+  let names;
+  try { names = readdirSync(dir); } catch { return out; }
+  for (const n of names) {
+    if (['node_modules', '.git', 'out', '.frames', 'dist', 'build'].includes(n) || n.startsWith('.')) continue;
+    const p = join(dir, n);
+    let st;
+    try { st = lstatSync(p); } catch { continue; }
+    if (st.isSymbolicLink()) continue;
+    if (st.isDirectory()) walkVideos(p, depth - 1, out);
+    else if (st.isFile() && VIDEO_EXT.test(n)) out.push(p);
+  }
+  return out.sort();
+}
+export function videoPoster(video, out) {
+  try {
+    const r = spawnSync('ffmpeg', ['-y', '-loglevel', 'error', '-ss', '1', '-i', video, '-frames:v', '1', out], { encoding: 'utf8' });
+    return r.status === 0 && existsSync(out);
+  } catch { return false; }
+}
+// Repo scan first, --brand-from second. A brand-from directory (a site/app repo or an
+// exported asset folder) is scanned the same way as the repo and wins on logo, palette
+// and refs; a tokens JSON or CSS file overrides the palette only. Font families named
+// in tokens are advisory: a family only lands in fonts.json if a matching font file
+// was actually found, so a name can never invent a font.
+export function discoverBrand(repo, brandFrom) {
+  const base = discover(repo);
+  if (!brandFrom) return { ...base, videoRefs: [], brandFrom: null, tokenFamilies: [] };
+  const src = resolve(brandFrom);
+  if (!existsSync(src)) throw new Error(`--brand-from not found: ${brandFrom}`);
+  const st = lstatSync(src);
+  if (st.isFile()) {
+    if (/\.json$/i.test(src)) {
+      const t = parseTokensFile(tryRead(src) ?? '');
+      if (!t) throw new Error(`--brand-from ${brandFrom} is not a readable JSON object`);
+      const palette = { ...base.palette };
+      for (const [k, v] of Object.entries(t.palette)) if (v) palette[k] = v;
+      return { ...base, palette, videoRefs: [], brandFrom, tokenFamilies: t.families };
+    }
+    if (/\.css$/i.test(src)) {
+      const palette = { ...base.palette };
+      for (const [k, v] of Object.entries(cssVarsPalette(tryRead(src) ?? ''))) palette[k] = v;
+      return { ...base, palette, videoRefs: [], brandFrom, tokenFamilies: [] };
+    }
+    throw new Error(`--brand-from file must be .json tokens or .css, got ${basename(src)}`);
+  }
+  const d = discover(src);
+  const palette = { ...base.palette };
+  for (const k of ['paper', 'ink', 'accent']) if (d.palette[k]) palette[k] = d.palette[k];
+  const dedup = (xs) => [...new Set(xs)];
+  return {
+    logo: d.logo ?? base.logo,
+    fonts: dedup([...d.fonts, ...base.fonts]),
+    palette,
+    refs: dedup([...d.refs, ...base.refs]).slice(0, 4),
+    shots: dedup([...d.shots, ...base.shots]).slice(0, 4),
+    name: base.name, tagline: base.tagline,
+    videoRefs: walkVideos(src, 3, []).slice(0, 4),
+    brandFrom, tokenFamilies: [],
+  };
+}
+
 const fill = (s, v) => s.replace(/\{\{(\w+)\}\}/g, (_, k) => v[k] ?? `{{${k}}}`);
 const titleCase = (s) => s.replace(/[-_]+/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
 
-export function scaffold(dirArg = 'motion', { repo = process.cwd() } = {}) {
+export function scaffold(dirArg = 'motion', { repo = process.cwd(), brandFrom = null } = {}) {
   const dir = resolve(repo, dirArg);
   if (existsSync(join(dir, 'project.json'))) throw new Error(`${dir} already has a project.json`);
-  const d = discover(repo);
+  const d = discoverBrand(repo, brandFrom);
   const log = [];
   for (const sub of ['brand/fonts', 'brand/refs', 'brand/shots', 'scenes']) mkdirSync(join(dir, sub), { recursive: true });
 
@@ -110,14 +230,29 @@ export function scaffold(dirArg = 'motion', { repo = process.cwd() } = {}) {
   }
   writeFileSync(join(dir, 'brand/fonts/fonts.json'), JSON.stringify(meta, null, 2) + '\n');
   log.push(d.fonts.length ? `fonts    ${d.fonts.length} found; check brand/fonts/fonts.json for family and weight` : 'fonts    NOT FOUND: add .woff2 files to brand/fonts/ (the render refuses to run without one)');
+  if (d.tokenFamilies?.length) {
+    const have = new Set(Object.values(meta).map((m) => m.family));
+    const missing = d.tokenFamilies.filter((f) => !have.has(f));
+    if (missing.length) log.push(`fonts    named in tokens but no matching font file found: ${missing.join(', ')} (add the files to brand/fonts/)`);
+
+  }
 
   const p = d.palette;
-  const colors = { paper: p.paper ?? '#ffffff', ink: p.ink ?? '#111111', accent: p.accent ?? '#555555', muted: '#666666', card: '#ffffff', rule: 'rgba(0,0,0,0.16)' };
+  const colors = { paper: p.paper ?? '#ffffff', ink: p.ink ?? '#111111', accent: p.accent ?? '#555555', muted: p.muted ?? '#666666', card: p.card ?? '#ffffff', rule: 'rgba(0,0,0,0.16)' };
   writeFileSync(join(dir, 'brand/colors.json'), JSON.stringify(colors, null, 2) + '\n');
-  log.push(`colors   paper ${p.paper ?? '(default)'}, ink ${p.ink ?? '(default)'}, accent ${p.accent ?? '(default)'}${p.paper && p.ink && p.accent ? '' : ': edit brand/colors.json'}`);
+  log.push(`colors   ${d.brandFrom ? `(--brand-from ${d.brandFrom}) ` : ''}paper ${p.paper ?? '(default)'}, ink ${p.ink ?? '(default)'}, accent ${p.accent ?? '(default)'}${p.paper && p.ink && p.accent ? '' : ': edit brand/colors.json'}`);
 
   const refs = d.refs.filter((r, i) => safeCopy(r, join(dir, 'brand/refs', `ref-${i + 1}${extname(r).toLowerCase()}`)));
-  log.push(refs.length >= 2 ? `refs     ${refs.length} found` : `refs     ${refs.length} found, need 2 or more in brand/refs/ (screenshots of the product or site at its best)`);
+  // Video references become poster frames, so the 2+ reference-frames gate sees
+  // them exactly like image references. A failed extraction is a skipped ref, not a crash.
+  let posters = 0;
+  for (const v of d.videoRefs ?? []) {
+    const out = join(dir, 'brand/refs', `ref-${refs.length + posters + 1}.png`);
+    if (videoPoster(v, out)) { posters++; log.push(`refs     video ${relative(repo, v)} -> poster frame ${basename(out)}`); }
+    else log.push(`refs     video skipped (ffmpeg poster failed): ${relative(repo, v)}`);
+  }
+  const totalRefs = refs.length + posters;
+  log.push(totalRefs >= 2 ? `refs     ${totalRefs} found (${refs.length} image, ${posters} video poster)` : `refs     ${totalRefs} found, need 2 or more in brand/refs/ (screenshots of the product or site at its best)`);
   const shots = d.shots.filter((r, i) => safeCopy(r, join(dir, 'brand/shots', `shot-${i + 1}${extname(r).toLowerCase()}`)));
   if (shots.length) log.push(`shots    ${shots.length} candidate screenshots copied to brand/shots/`);
   d.shots = shots;
