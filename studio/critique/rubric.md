@@ -19,6 +19,19 @@ Two more image sets come with the brief, and they carry evidence the spread-out 
 
 Color discipline: the one thing the viewer should follow gets the accent color, and each color keeps one meaning for the whole film. An accent used on three unrelated things, or a second accent that competes with the first, is a defect.
 
+## Attention checks (reviewer only)
+
+These are judged from the sheets and strips, the same as the five above. They are not a checklist for the person making the film: the film either holds attention or it does not, and no form the maker fills in can prove that.
+
+6. Hook legibility in the first frames. The first thing on screen reads at a glance, at phone size, before anything else moves. If the opening needs a second look to parse, it has already lost the viewer.
+7. One clear first read. Each scene has one thing to follow first. Two competing headlines, or a headline fighting a moving screenshot, is a defect even if both are legible on their own.
+8. Change frequency. A film that never changes shot or state goes flat, and a film that changes every beat gives the eye nowhere to land. Flag any single unbroken shot that runs long with nothing new arriving: the mechanical score reports the longest shot and the longest static run, and a shot past about 10 seconds with no new information is a defect unless the shot itself is the point.
+9. Caption readability at phone size. Captions must read on a phone held at arm's length: large enough, high enough contrast, and never colliding with the thing they describe. A caption that duplicates the headline word for word is fluff, not help.
+10. Loop and rehook. Around 60 to 70 percent of the film, something fresh must arrive: a new question, a turn, a contrast. A film that only restates its opening for the second half has no reason to be watched to the end, and a film that ends without restating its point has no reason to be remembered.
+11. Fluff. Frames that repeat information already given, with nothing new added, are a defect. Every scene must earn its beats with something the viewer did not already have.
+
+Sound, judged from the brief's sound list against the sheets: one sound per visual event that matters, placed where the visual lands. A sound with no visual event behind it, or a visual event the film leans on arriving in silence, is a note. Sounds on every word or every frame are noise, not emphasis.
+
 Score guide:
 
 - 9 to 10: could ship as is.

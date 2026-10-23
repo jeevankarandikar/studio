@@ -64,6 +64,20 @@ export function filmSheet(project) {
 
 export { frameDeltas };
 
+// Attention proxies measurable without a model. They are reported, not scored: the reviewer
+// (rubric.md checks 8-10) judges whether a long shot or a missing caption actually hurts,
+// and its verdict can only lower the score through review.json. What cannot be measured here
+// — hook legibility, first-read clarity, caption size at phone size — stays reviewer-only.
+export function attentionProxies(project, scene, dead) {
+  const longestStaticRun = dead.reduce((m, d) => Math.max(m, d.frames), 0);
+  return {
+    longestStaticRun,
+    longestShotSec: Math.round((scene.frames / project.fps) * 100) / 100,
+    cuts: Math.max(0, project.scenes.length - 1),
+    captions: project.captions.length,
+  };
+}
+
 export function scoreProject(project) {
   const deltas = frameDeltas(project);
   // The review belongs to one format's render, and render() drops a scene's entry when the scene is re-rendered.
@@ -82,6 +96,9 @@ export function scoreProject(project) {
     score = Math.max(1, Math.round(score * 10) / 10);
     const r = review[scene.index];
     if (r) { if (r.score < score) score = r.score; if (r.notes) notes.push(`review: ${r.notes}`); }
-    return { scene: scene.index, file: scene.file.split('/').pop(), score, motion: Math.round(motion * 100) / 100, dead, notes, sheet: contactSheet(project, scene) };
+    const attention = attentionProxies(project, scene, dead);
+    if (attention.longestShotSec > 10) notes.push(`long unbroken shot ${attention.longestShotSec}s (attention: change frequency)`);
+    if (scene.index === 0 && attention.captions === 0) notes.push('no captions in project.json (attention: caption readability)');
+    return { scene: scene.index, file: scene.file.split('/').pop(), score, motion: Math.round(motion * 100) / 100, dead, notes, sheet: contactSheet(project, scene), attention };
   });
 }
