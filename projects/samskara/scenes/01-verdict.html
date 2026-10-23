@@ -1,0 +1,27 @@
+<!doctype html>
+<!-- The second half of the same demo shape: a question, then a verdict. The
+     question and verdict are the established flagship-demo shape; no message
+     bodies, dates, or counts are shown, and the words are placeholders to
+     replace with the real demo's words before anything ships. -->
+<meta charset="utf-8">
+<link rel="stylesheet" href="common.css">
+<body>
+<div id="amb"></div>
+<div id="q" class="abs h1" style="left:160px;top:220px;width:1500px;font-family:'DejaVu Serif',Georgia,serif">Should I text my ex?</div>
+<div id="v" class="abs h2" style="left:160px;top:520px;width:1500px;font-family:'DejaVu Serif',Georgia,serif">I'd skip it.</div>
+<div id="sub" class="abs sub" style="left:166px;top:720px;width:1300px">You chose what it could see.</div>
+<script src="common.js"></script>
+<script>
+const qW = splitWords($('q'));
+const vW = splitWords($('v'));
+const subW = splitWords($('sub'));
+window.scene = {
+  sfx: [{ t: 0.2, name: 'pop' }, { t: 1.4, name: 'chime' }, { t: 2.2, name: 'settle' }],
+  render(t, f, ctx) {
+    ambient($('amb'), t);
+    wordsIn(qW, t, { delay: 0.2, step: 0.1, rise: 110 });
+    wordsIn(vW, t, { delay: 1.4, step: 0.1, rise: 90, preset: spring.soft });
+    wordsIn(subW, t, { delay: 2.2, step: 0.08, rise: 40, preset: spring.soft });
+  },
+};
+</script>

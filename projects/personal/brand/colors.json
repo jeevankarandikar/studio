@@ -1,0 +1,8 @@
+{
+  "paper": "#0b0b0b",
+  "ink": "#fafafa",
+  "accent": "#e4572e",
+  "muted": "#a3a3a3",
+  "card": "#1a1a1a",
+  "rule": "rgba(255,255,255,0.16)"
+}

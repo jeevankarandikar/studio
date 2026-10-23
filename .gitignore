@@ -1,6 +1,6 @@
 node_modules/
-# local projects live in the repo they are for; anything here is scratch
-projects/
+# projects/ is studio's own home and IS committed (see projects/README.md).
+# Only renders and frame caches are scratch, at any depth.
 out/
 .frames/
 frames/

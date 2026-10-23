@@ -1,0 +1,17 @@
+{
+  "bpm": 120,
+  "fps": 30,
+  "size": [1920, 1080],
+  "formats": { "vertical": [1080, 1920], "square": [1080, 1080] },
+  "cutSfx": "whoosh",
+  "job": "Storytelling",
+  "scenes": [
+    { "file": "00-day.html", "beats": 6 },
+    { "file": "01-loop.html", "beats": 6 },
+    { "file": "02-impact.html", "beats": 6 }
+  ],
+  "captions": [
+    { "beat": 0, "beats": 6, "text": "Day one of posting every day." },
+    { "beat": 12, "beats": 6, "text": "One word. One beat." }
+  ]
+}

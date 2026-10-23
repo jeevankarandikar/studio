@@ -1,6 +1,6 @@
 # studio
 
-A toolbox that turns HTML scenes into motion videos, for any repo, project or product. It holds no projects. A video project is a folder inside the repo it is for, and `studio` renders it.
+One repo for all kinds of content creation — ads, animation, motion design work — that turns HTML scenes into motion videos. It is the consolidated home: real content projects live here, in `projects/`, and it can take any design system as input — a website, a video, an app — by pointing at that system's repo or exported assets.
 
 Scenes are plain HTML, CSS and JavaScript. Playwright captures every frame in headless Chrome, FFmpeg stitches the frames with a synthesized score into an MP4, and a critique loop scores each scene and flags the weak ones.
 
@@ -20,24 +20,49 @@ studio doctor       # checks node, ffmpeg, the browser, and tells you the fix fo
 
 Set `PLAYWRIGHT_BROWSERS_PATH=0` whenever you render, so it uses the browser installed above.
 
-## Use it in a repo
+## Projects live here
+
+```bash
+studio loop samskara --first    # a first project, by bare name (see projects/)
+studio loop projects/personal --first
+studio sheet projects/personal 0  # 8-frame contact sheet of one scene, in seconds
+```
+
+`projects/` holds the two first lanes, each a normal project folder with its own brand pack — that is the point of the brand-pack-per-project design: the same tool, rules and commands render both, and only `brand/` changes.
+
+- `projects/samskara/` — Samskara marketing. Brand: light mode only, Apple-like, serif headline. Scenes: a menu-bar glass approval panel drawn as HTML (tick/untick/approve, no message bodies), then a question-then-verdict moment. Generic product motion, not a screenshot of the real app.
+- `projects/personal/` — personal creator videos. Brand: blackout, viashaan impact text, word-for-word captions, day X/30 card. Scenes: title + day card, dopamine loop, impact text.
+
+See `projects/README.md` and `projects/PROMPTS.md` for the prompt style behind each scene set.
+
+## Use it in another repo
+
+`studio init` still works outside studio, for a project that belongs in another repo (backward compatible):
 
 ```bash
 cd ~/code/my-product
 studio init                      # creates ./motion with a brand pack taken from the repo
 studio loop motion --first       # render all scenes, score them
-studio sheet motion 0            # 8-frame contact sheet of one scene, in seconds
 ```
 
 `studio init` reads the repo for a logo, font files, CSS color variables, reference images and screenshots, and the name and description from `package.json`. It reports what it found and what is missing. Nothing is invented: a missing font or reference image stops the render with a message.
 
+### Any design system in
+
+`studio init [--brand-from <source>]` accepts brand sources alongside the repo scan, in this order of precedence for colors: a design-tokens JSON file (colors, fonts), a CSS file with custom properties, or a folder — a site/app repo, an exported asset folder, or a folder of reference images and videos. For a video reference, ffmpeg extracts a poster frame into `brand/refs/`, so the two-reference-frames gate still works. A website or an app as input means pointing init at that site/app's repo or exported assets. There is no live web scraping and no Figma API dependency, by design — a font family named in a tokens file only lands in `fonts.json` if a matching font file was actually found.
+
 The project folder carries its own `AGENTS.md` with the scene rules and commands, so an agent working in that repo knows how to author and render without reading this file.
+
+## Gates
+
+`studio gate` runs the film through approvals before the expensive render. First it renders one midpoint still per scene, cheap, and records approval per scene in `out/<tag>/gates/approval.json` (never in `scenes/`). Approve scenes with `studio gate <project> --approve 0,1`, reject with `--reject 2`. A rejected scene blocks the gate until it is fixed and re-stilled (`--restill`). Once every scene is approved, the gate renders a low-fps animatic (every 5th frame at 6 fps) with the synthesized score; approve it with `--approve-animatic` and the gate runs the full render. `sheet` and `watch` keep working as before; gates reuse the same capture code, they do not duplicate it.
 
 ## Commands
 
 | command | does |
 |---|---|
-| `studio init [dir]` | make a project in the current repo (default `./motion`) |
+| `studio init [dir] [--brand-from <tokens.json\|theme.css\|dir>]` | make a project in the current repo (default `./motion`), or in `projects/` by hand; brand from the repo scan and/or the brand source |
+| `studio gate <project> [--approve 0,1] [--reject 2] [--approve-animatic] [--restill]` | stills first, then a low-fps animatic with sound, then the full render — each stage only on approval |
 | `studio loop <project> [--first] [--review]` | render, score, re-render weak scenes |
 | `studio render <project> [--scene N] [--format name]` | render and stitch |
 | `studio sheet <project> <scene>` | contact sheet for one scene |
@@ -57,11 +82,13 @@ A `<project>` is a path to a folder with a `project.json`, or a name found under
 
 ```
 motion/
-  project.json     bpm, fps, size, scenes in beats, extra formats, captions, optional voiceover
+  project.json     bpm, fps, size, scenes in beats, extra formats, captions, optional voiceover, optional job
   brand/           colors.json, fonts/ (+ fonts.json), logo.svg|png, refs/ (2+), shots/
   scenes/          NN-name.html, common.js, common.css
   out/  .frames/   gitignored
 ```
+
+`project.json` can carry an optional `job`: one of `Storytelling`, `Relatable`, `Opinion`, `Advice`. It names what the film is for, not what it is about, and changes nothing about the render. An unknown value stops the load with a clear error. Structure templates live in `templates/`: `prep.html` (PREP: Point, Reason, Explain, Point restated), `loop.html` (Stakes, Big Question, Headfake/Contrast, Rehook around 65%), `silent.html` (struggle hook, payoff-promising timestamp, transformation beat, on-screen text only), `impact.html` (one full-screen word per beat, one sound per word). The first working projects using them are in `projects/`.
 
 The render refuses to run until the brand pack loads: palette, at least one font, a logo, and two reference frames.
 
@@ -75,7 +102,7 @@ The render refuses to run until the brand pack loads: palette, at least one font
 
 ## Scoring and review
 
-Each scene starts at 10. Points come off for dead frames (8 or more near-identical frames in a row), low motion density, a cut off the beat and lint hits. `studio review --auto` hands the contact sheets and `studio/critique/rubric.md` to a fresh-context model that sees nothing of how the scenes were built, and its score can only lower the mechanical one. Every scene needs 8 or more.
+Each scene starts at 10. Points come off for dead frames (8 or more near-identical frames in a row), low motion density, a cut off the beat and lint hits. `studio review --auto` hands the contact sheets and `studio/critique/rubric.md` to a fresh-context model that sees nothing of how the scenes were built, and its score can only lower the mechanical one. Every scene needs 8 or more. The rubric also carries attention checks the reviewer judges from the sheets and strips (hook legible in the first frames, one clear first read, change frequency, caption readability at phone size, a fresh loop or rehook around 60-70%, fluff, and one sound per visual event). The mechanical score reports measurable proxies for these — longest static run, longest shot, cut count, caption presence — as notes, without changing the score; what cannot be measured stays reviewer-only, and the rubric is never a checklist the maker fills in.
 
 ## Sound effects
 
@@ -99,10 +126,22 @@ window.scene = {
 
 ## Formats and delivery
 
-`project.json` can list `formats` such as `vertical` (1080x1920) and `square` (1080x1080). A scene written for 16:9 is scaled to fit unless it sets `window.scene.native = true` and lays itself out from `window.__format`. `captions` are beat-timed and drawn as a spring-animated overlay. A `voiceover` file is mixed over a ducked score. `studio export` writes a web MP4, WebM, poster frame and looping GIF.
+`project.json` can list `formats` such as `vertical` (1080x1920) and `square` (1080x1080). A scene written for 16:9 is scaled to fit unless it sets `window.scene.native = true` and lays itself out from `window.__format`. `captions` are beat-timed and drawn as a spring-animated overlay. A `voiceover` file is mixed over a ducked score. `studio export` writes a web MP4, WebM, poster frame and looping GIF. One scene set renders to every ad placement: vertical 1080x1920, square 1080x1080, and 16:9, plus web MP4, WebM, poster, and GIF, with captions.
+
+## What changed and why (0.2.0)
+
+- Gates (`studio gate`): the two-stage approval loop — stills, then animatic with sound, then full render — ported as a pattern from [Emaki](https://github.com/bypshkn/emaki) (MIT), the public code-drawn video tool with style-still and animatic gates, a critic pass and synthesized music. No gated or private skill was ported; the gate idea and the critic idea are the port, implemented on studio's own capture code.
+- Attention rubric: checks baked into the reviewer prompt and mechanical proxies in the score, from [Content Principles](https://github.com/aiwithremy/content-principles) (write for one person, name the time cost, line 1 sells line 2, curiosity loops, specificity, value per second, cut the fluff, preempt the scroll-objection, frame rhythm). The skill itself says to apply these silently, so they live in the reviewer prompt and the score, not in a form the maker fills in.
+- Downbeat and effect primitives (`downbeat`, `brushStroke`, `orbField`, `impactWord` in `kit/common.js`): the open-source-effects-as-code, own-music-with-downbeats, and brand-file ideas from recent motion reels, implemented as pure functions of time and seed with plain canvas, no new dependency.
+- Structure templates (`prep.html`, `loop.html`, `silent.html`, `impact.html`): delivery and story shapes from recent reels — a Point/Reason/Explain/Point delivery structure, a Stakes/Big Question/Headfake/Rehook loop, a silent-film struggle-hook/timestamp/transformation shape, and a full-screen impact-text primitive with one sound per visual event.
+- Format-job tagging (`job` in `project.json`): tag a film by the job it does (Storytelling, Relatable, Opinion, Advice), not just by topic.
+- HyperFrames and cstack remain cited related work as before; nothing was reimplemented from them in this pass.
+- Consolidation (0.2.0): studio is now the home, not just a toolbox installed elsewhere. `projects/` holds two real first projects — `samskara/` (light, Apple-like, serif) and `personal/` (blackout, impact text, captions, day X/30 card) — each a normal project folder, so `loop`/`render`/`sheet`/`review` work on them unchanged, including by bare name. The earlier throwaway `examples/demo/` became these two projects, and `examples/PROMPTS.md` became `projects/PROMPTS.md`. `studio init` still works in outside repos.
+- Any design system in (0.2.0): `studio init --brand-from` accepts a design-tokens JSON file, a CSS file with custom properties, or a folder of reference images and videos (a video reference becomes a poster frame via ffmpeg). The CLI already parsed `--brand-from` but never used it; it is now wired into init. No live web scraping, no Figma API, no new runtime dependencies.
 
 ## Known limits
 
 - The browser needs to start normally. Inside a macOS app sandbox (including Claude Code's Bash sandbox) Chromium cannot start; run renders in a normal terminal or exclude `studio` from the sandbox. `studio doctor` says which.
 - Renders are deterministic on one machine and Chrome version. Different Chrome or font rasterization can shift pixels.
 - `studio review --auto` needs the `claude` CLI and has not been exercised against it yet.
+- Studio generates the motion layer — titles, captions, impact words, fully drawn product moments — not camera or face footage. It does not replace filming a talking head; it makes the pieces that sit on top of it and the fully drawn product moments.

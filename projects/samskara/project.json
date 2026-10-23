@@ -1,0 +1,15 @@
+{
+  "bpm": 120,
+  "fps": 30,
+  "size": [1920, 1080],
+  "formats": { "vertical": [1080, 1920], "square": [1080, 1080] },
+  "cutSfx": "whoosh",
+  "scenes": [
+    { "file": "00-panel.html", "beats": 6 },
+    { "file": "01-verdict.html", "beats": 6 }
+  ],
+  "captions": [
+    { "beat": 0, "beats": 6, "text": "It asks before it reads." },
+    { "beat": 6, "beats": 6, "text": "You tick each message." }
+  ]
+}

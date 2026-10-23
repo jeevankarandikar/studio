@@ -28,6 +28,7 @@ studio check .                       # same frame twice must be byte-identical
 - All motion is `spring(t - delay, { from, to, k, c, m })` or a preset (`spring.snappy`, `spring.soft`, `spring.bouncy`). No CSS transitions, animations or easing curves. `studio lint` fails the render if any appear.
 - Scene lengths are beats in `project.json`. At 120 bpm and 30 fps one beat is 15 frames, so every cut lands on the beat.
 - Colors and fonts come from `brand/` as CSS variables and font families. Do not hardcode brand colors in scenes.
+- A brand pack comes from `studio init`'s repo scan, or from `--brand-from`: a design-tokens JSON file (colors, fonts), a CSS file with custom properties, or a folder of reference images and videos (a video reference becomes a poster frame in `brand/refs/`). A website or app as input means pointing init at that site/app's repo or exported assets — no live scraping, no Figma API.
 - No frame may sit still. Use `kick(ctx)` for a spring on every beat and `ambient()` for background drift.
 - Left-aligned layouts. No centered all-caps text on a gradient.
 - Real product screenshots go in `brand/shots/`. List each scene's required files under `needs` in `project.json`.

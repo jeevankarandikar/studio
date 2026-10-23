@@ -1,0 +1,42 @@
+<!doctype html>
+<!-- Product-motion moment, not a screenshot of the real app: a glass panel drops
+     from the menu bar, shows exactly which sources it wants to read, one row is
+     unticked on purpose, then Approve. Row labels are the established demo set
+     (Texts, Snapchat, Instagram, Notes); no message bodies are shown, ever. -->
+<meta charset="utf-8">
+<link rel="stylesheet" href="common.css">
+<body>
+<div id="bar" style="position:absolute;left:0;right:0;top:0;height:48px;background:rgba(255,255,255,0.75);border-bottom:1px solid rgba(0,0,0,0.10)"></div>
+<div id="panel" style="position:absolute;left:660px;top:64px;width:600px;padding:36px 40px 32px;border-radius:28px;background:rgba(255,255,255,0.72);border:1px solid rgba(0,0,0,0.10);box-shadow:0 30px 80px rgba(0,0,0,0.18)">
+  <div class="label" style="margin-bottom:24px">It asks before it reads</div>
+  <div class="row" style="display:flex;align-items:center;gap:20px;margin:18px 0"><span class="box"></span><span class="sub" style="font-size:36px">Texts</span></div>
+  <div class="row" style="display:flex;align-items:center;gap:20px;margin:18px 0"><span class="box"></span><span class="sub" style="font-size:36px">Snapchat</span></div>
+  <div class="row" style="display:flex;align-items:center;gap:20px;margin:18px 0"><span class="box"></span><span class="sub" style="font-size:36px">Instagram</span></div>
+  <div class="row" style="display:flex;align-items:center;gap:20px;margin:18px 0"><span class="box"></span><span class="sub" style="font-size:36px">Notes</span></div>
+  <div id="approve" class="sub" style="margin-top:28px;padding:16px 0;text-align:center;border-radius:16px;background:var(--accent);color:#fff;font-size:32px">Approve</div>
+</div>
+<style>
+.box{display:inline-block;width:38px;height:38px;border:2px solid var(--ink);border-radius:9px;position:relative;flex:none}
+.box.on::after{content:"";position:absolute;left:9px;top:4px;width:12px;height:22px;border:solid var(--accent);border-width:0 5px 5px 0;transform:rotate(42deg)}
+</style>
+<script src="common.js"></script>
+<script>
+const boxes = [...document.querySelectorAll('.box')];
+// Row 2 (Instagram) is the deliberate untick: its check arrives, then leaves.
+const delays = [0.6, 0.9, 1.2, 1.5];
+window.scene = {
+  sfx: [{ t: 0.2, name: 'whoosh' }, { t: 0.6, name: 'tick', gain: 0.3 }, { t: 1.2, name: 'tick', gain: 0.3 }, { t: 1.8, name: 'tick', gain: 0.3 }, { t: 2.5, name: 'settle' }],
+  render(t, f, ctx) {
+    pos($('panel'), 0, sp(t, 0.2, spring.bouncy, -700, 0));
+    $('panel').style.opacity = clamp((t - 0.2) / 0.15);
+    boxes.forEach((b, i) => {
+      let on = clamp((t - delays[i]) / 0.1);
+      if (i === 2 && t >= 1.8) on = 1 - clamp((t - 1.8) / 0.15); // the untick
+      b.classList.toggle('on', on > 0.5);
+    });
+    const a = $('approve');
+    a.style.transform = `scale(${sp(t, 2.5, spring.snappy, 0.9, 1)})`;
+    a.style.opacity = clamp((t - 2.5) / 0.15);
+  },
+};
+</script>
