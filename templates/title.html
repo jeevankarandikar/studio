@@ -1,0 +1,29 @@
+<!doctype html>
+<meta charset="utf-8">
+<link rel="stylesheet" href="common.css">
+<body>
+<div id="amb"></div>
+<img id="mark" class="abs" src="../brand/{{LOGO}}" style="left:0;top:0;width:340px;height:340px;object-fit:contain">
+<div id="name" class="abs h1" style="left:160px;top:520px;font-size:176px">{{NAME}}</div>
+<div id="bar" class="rule" style="left:166px;top:722px;width:420px;height:4px;background:var(--accent,var(--ink))"></div>
+<div id="tag" class="abs sub" style="left:166px;top:760px;width:1100px">{{TAGLINE}}</div>
+<script src="common.js"></script>
+<script>
+const nameW = splitWords($('name'));
+const tagW = splitWords($('tag'));
+window.scene = {
+  // sound events, in seconds from the scene start: place each next to the visual it belongs to
+  sfx: [{ t: 0.25, name: 'pop' }, { t: 1.0, name: 'swipe' }],
+  render(t, f, ctx) {
+    ambient($('amb'), t);
+    const K = kick(ctx) * clamp((t - 1.0) / 0.2);
+    pos($('mark'), 1300, 170 + sp(t, 0, spring.bouncy, -240, 0) - K * 30, `scale(${sp(t, 0, spring.snappy, 0.7, 1) + K * 0.06})`);
+    $('mark').style.opacity = clamp(t / 0.15);
+    wordsIn(nameW, t, { delay: 0.25, step: 0.125, rise: 120 });
+    $('bar').style.transform = `scaleX(${sp(t, 1.0, spring.snappy, 0, 1)}) scaleY(${1 + K * 1.2})`;
+    wordsIn(tagW, t, { delay: 1.0, step: 0.1, rise: 40, preset: spring.soft });
+    const out = sp(t, 2.5, spring.snappy, 0, 1); // lift off on the last beat so the cut lands clean
+    document.body.style.transform = `translateY(${-out * 90}px)`;
+  },
+};
+</script>

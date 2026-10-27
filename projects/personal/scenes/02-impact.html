@@ -1,0 +1,30 @@
+<!doctype html>
+<!-- Impact text: one full-screen word per beat, from the locked viashaan edit system
+     (full-screen impact text, type animations, transitions, SFX). The primitive is
+     impactWord() in scenes/common.js: a word springs in large and settles. One sound
+     per word, placed on the word's beat, never one per letter. -->
+<meta charset="utf-8">
+<link rel="stylesheet" href="common.css">
+<body>
+<div id="amb"></div>
+<div id="w1" class="abs h1" style="left:160px;top:300px;font-size:260px">ONE</div>
+<div id="w2" class="abs h1" style="left:160px;top:300px;font-size:260px">CLEAR</div>
+<div id="w3" class="abs h1" style="left:160px;top:300px;font-size:260px">READ</div>
+<div id="sub" class="abs sub" style="left:166px;top:700px;width:1200px">One word. One beat. Nothing else.</div>
+<script src="common.js"></script>
+<script>
+const subW = splitWords($('sub'));
+const words = [[$('w1'), 0.0], [$('w2'), 0.5], [$('w3'), 1.0]];
+window.scene = {
+  sfx: [{ t: 0.0, name: 'pop' }, { t: 0.5, name: 'pop' }, { t: 1.0, name: 'pop' }],
+  render(t, f, ctx) {
+    ambient($('amb'), t);
+    for (const [el, d] of words) {
+      impactWord(el, t, d);
+      // Only the current word shows; earlier words are out by the next beat.
+      el.style.opacity = t < d + 0.5 ? el.style.opacity : 0;
+    }
+    wordsIn(subW, t, { delay: 1.6, step: 0.08, rise: 40, preset: spring.soft });
+  },
+};
+</script>

@@ -1,0 +1,7 @@
+node_modules/
+# projects/ is studio's own home and IS committed (see projects/README.md).
+# Only renders and frame caches are scratch, at any depth.
+out/
+.frames/
+frames/
+.design-refs/
