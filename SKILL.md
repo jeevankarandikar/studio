@@ -33,6 +33,7 @@ Load a reference when the work touches its subject, and only then:
 | [interaction.md](references/interaction.md) | Control states, forms, waiting, overlays, keyboard, motion timing, first run and empty states |
 | [words.md](references/words.md) | Labels, buttons, errors and other interface text |
 | [data-viz.md](references/data-viz.md) | Any chart or dashboard |
+| [product-demos.md](references/product-demos.md) | Anything that shows a product instead of being it: heroes, films, bento tiles, onboarding art, screenshots on a page, and which of those rules reach real screens |
 | [verticals.md](references/verticals.md) | What a field demands: money, developer tools, business software, health, shops, AI products, consumer apps, landing pages |
 
 ## Explore
