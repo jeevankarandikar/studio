@@ -26,6 +26,7 @@ The judgment behind the stages lives in reference files the skill loads only whe
 | [interaction.md](design-jeev/references/interaction.md) | Control states, forms, waiting, overlays, keyboard, motion timing, first run |
 | [words.md](design-jeev/references/words.md) | Interface text |
 | [data-viz.md](design-jeev/references/data-viz.md) | Chart choice and palettes that survive color blindness |
+| [product-demos.md](design-jeev/references/product-demos.md) | Anything that shows a product instead of being it: heroes, films, bento tiles, onboarding art, screenshots on a page |
 | [verticals.md](design-jeev/references/verticals.md) | What money, developer, business, health, shop, AI and consumer products each demand |
 | [critique.md](design-jeev/references/critique.md) | Heuristic scoring and the signs of a generic look |
 
