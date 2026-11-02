@@ -1,0 +1,283 @@
+{
+  "note": "Third-party skills, pinned by commit. scripts/vendor.py copies them into skills/, and install.py reads the groups. Never edit a vendored folder by hand.",
+  "groups": {
+    "core": {
+      "about": "The design skill, the video skill and the writing guard. Installed by default.",
+      "skills": [
+        "design-jeev",
+        "motion"
+      ]
+    }
+  },
+  "sources": [
+    {
+      "id": "emil",
+      "group": "emil",
+      "about": "Emil Kowalski's design engineering and animation craft.",
+      "author": "Emil Kowalski",
+      "repo": "emilkowalski/skills",
+      "ref": "f1090bec277140d02ed202440185ad9d02ac1490",
+      "license": "MIT",
+      "licenses": [
+        "LICENSE"
+      ],
+      "skills": {
+        "animate": "skills/animate",
+        "animate-expo": "skills/animate-expo",
+        "animation-performance": "skills/animation-performance",
+        "animation-vocabulary": "skills/animation-vocabulary",
+        "apple-design": "skills/apple-design",
+        "ask-sonner": "skills/ask-sonner",
+        "break-ui": "skills/break-ui",
+        "emil-design-eng": "skills/emil-design-eng",
+        "find-animation-opportunities": "skills/find-animation-opportunities",
+        "improve-animations": "skills/improve-animations",
+        "mobile-native": "skills/mobile-native",
+        "pick-ui-library": "skills/pick-ui-library",
+        "prototype": "skills/prototype",
+        "remove-animations": "skills/remove-animations",
+        "review-animations": "skills/review-animations"
+      },
+      "hashes": {
+        "animate": "3e7bd86a38cc7743",
+        "animate-expo": "99547d1871a8eca1",
+        "animation-performance": "c9f09c37ea0864db",
+        "animation-vocabulary": "50ecf754f0213b56",
+        "apple-design": "d0c0d22170c7c5bd",
+        "ask-sonner": "50769245a7ad44b8",
+        "break-ui": "186dbd0b0fbce7a8",
+        "emil-design-eng": "18593ce315bc53e0",
+        "find-animation-opportunities": "1adb21f312ddde0c",
+        "improve-animations": "413408d67d1487ca",
+        "mobile-native": "9bbb988f181fe2d8",
+        "pick-ui-library": "96ce70d1d14ac0c3",
+        "prototype": "1d67ba38ce297d72",
+        "remove-animations": "c831400a1275146f",
+        "review-animations": "702eca23189814e6"
+      }
+    },
+    {
+      "id": "impeccable",
+      "group": "impeccable",
+      "about": "Paul Bakaus's design commands: shape, critique, audit, polish, animate.",
+      "author": "Paul Bakaus",
+      "repo": "pbakaus/impeccable",
+      "ref": "c3c94b960276a42a235d1ff68e9954a342e5407e",
+      "license": "Apache-2.0",
+      "licenses": [
+        "LICENSE",
+        "NOTICE.md"
+      ],
+      "extra_licenses": [
+        "licenses/LICENSE-ehmo-platform-design-skills"
+      ],
+      "skills": {
+        "impeccable": ".claude/skills/impeccable"
+      },
+      "agents": [
+        ".claude/agents/impeccable-asset-producer.md",
+        ".claude/agents/impeccable-documenter.md",
+        ".claude/agents/impeccable-finish-reviewer.md",
+        ".claude/agents/impeccable-manual-edit-applier.md"
+      ],
+      "hashes": {
+        "impeccable": "180c1747a1c235b6"
+      }
+    },
+    {
+      "id": "taste",
+      "group": "taste",
+      "about": "Art direction from a study of 247 curated sites, with a browser check.",
+      "author": "Leonxlnx",
+      "repo": "Leonxlnx/taste-skill",
+      "ref": "12af471f627f866411b4bd785b19646d3672784c",
+      "license": "MIT",
+      "licenses": [
+        "LICENSE"
+      ],
+      "skills": {
+        "taste-skill": "skills/taste-skill"
+      },
+      "hashes": {
+        "taste-skill": "755d56afd56825a4"
+      }
+    },
+    {
+      "id": "stageshow",
+      "group": "stageshow",
+      "about": "Faux product UI for heroes, demos and bento tiles, with a React kit.",
+      "author": "Benji Taylor",
+      "repo": "benjitaylor/skills",
+      "ref": "802057409787133703c56001080169e347305572",
+      "license": "MIT",
+      "licenses": [
+        "stageshow/LICENSE",
+        "stageshow/NOTICE.md"
+      ],
+      "skills": {
+        "stageshow": "stageshow"
+      },
+      "exclude": [
+        "LICENSE",
+        "NOTICE.md",
+        "assets",
+        "kit/phone.*",
+        "kit/ios.*",
+        "kit/brands",
+        "kit/parts/BrandMark.*",
+        "references/brands.md",
+        "references/teaching.md",
+        "teaching",
+        "examples/bento",
+        "examples/brand-marks",
+        "examples/device-pair",
+        "examples/dynamic-island",
+        "examples/figma",
+        "examples/gmail",
+        "examples/google-calendar",
+        "examples/google-docs",
+        "examples/imessage",
+        "examples/kit-extras",
+        "examples/messages",
+        "examples/parts",
+        "examples/phone-touch",
+        "examples/phones",
+        "examples/staggered-bento",
+        "examples/swipe",
+        "examples/telegram"
+      ],
+      "patches": {
+        "stageshow": {
+          "kit/index.ts": [
+            [
+              "export { Phone, LockScreen, Notification, WALLPAPER } from './phone'\n",
+              ""
+            ],
+            [
+              "export type { PhoneProps, PhoneFrame, LockScreenProps, NotificationProps } from './phone'\n",
+              ""
+            ],
+            [
+              "export { Keyboard } from './ios'\n",
+              ""
+            ],
+            [
+              "export type { KeyboardProps } from './ios'\n",
+              ""
+            ],
+            [
+              "Facepile, Chip, BrandMark, Pin, Row } from './parts'",
+              "Facepile, Chip, Pin, Row } from './parts'"
+            ],
+            [
+              "export type { AvatarProps, IconName, BrandMarkProps, PinProps, RowProps } from './parts'",
+              "export type { AvatarProps, IconName, PinProps, RowProps } from './parts'"
+            ],
+            [
+              "export { brandMarks } from './brands'\n",
+              ""
+            ],
+            [
+              "export type { BrandName, BrandAsset } from './brands'\n",
+              ""
+            ]
+          ],
+          "kit/parts/index.ts": [
+            [
+              "export { BrandMark } from './BrandMark'\n",
+              ""
+            ],
+            [
+              "export type { BrandMarkProps } from './BrandMark'\n",
+              ""
+            ]
+          ],
+          "kit/stageshow.css": [
+            [
+              "@import './phone.css';\n",
+              ""
+            ],
+            [
+              "@import './ios.css';\n",
+              ""
+            ],
+            [
+              "@import './parts/BrandMark.css';\n",
+              ""
+            ]
+          ],
+          "kit/parts/Avatar.css": [
+            [
+              "  /* The iOS contact monogram: Apple's gray-blue, lighter at the top */\n  .ss-avatar[data-tone=\"ios\"] {\n    background: linear-gradient(180deg, #a5abb8, #858a96);\n    color: #fff;\n    font-family: ui-rounded, 'SF Pro Rounded', -apple-system, system-ui, sans-serif;\n    font-weight: 600;\n    letter-spacing: 0.01em;\n  }\n\n",
+              ""
+            ]
+          ],
+          "playground/catalog.ts": [
+            [
+              "const extra = Object.keys(import.meta.glob('../examples/*/index.tsx'))\n  .map(path => path.split('/').at(-2)!)\n  .filter(id => !listed.has(id))",
+              "const present = Object.keys(import.meta.glob('../examples/*/index.tsx')).map(path => path.split('/').at(-2)!)\nconst extra = present\n  .filter(id => !listed.has(id))"
+            ],
+            [
+              "export const examples = [...curated.map(example =>",
+              "export const examples = [...curated.filter(example => present.includes(example.id)).map(example =>"
+            ],
+            [
+              "...products, ...specimens, ...extra]",
+              "...products.filter(example => present.includes(example.id)), ...specimens.filter(example => present.includes(example.id)), ...extra]"
+            ]
+          ],
+          "playground/preview.tsx": [
+            [
+              "const load = name === 'contrasts' ? () => import('../teaching/contrasts') : modules[`../examples/${name}/index.tsx`]",
+              "const load = modules[`../examples/${name}/index.tsx`]"
+            ]
+          ],
+          "SKILL.md": [
+            [
+              "# Stageshow\n",
+              "# Stageshow\n\nThis copy leaves out the phone frames, the iOS keyboard, the brand marks, the app icons, the teaching pairs and the examples that need them. Skip any table row or kit part below that is not on disk, and draw phones and logos only from assets the project owns. `UPSTREAM.json` lists what is gone.\n"
+            ]
+          ]
+        }
+      },
+      "hashes": {
+        "stageshow": "ce35714931680a2f"
+      }
+    },
+    {
+      "id": "refero",
+      "group": "refero",
+      "about": "Research-first design against real products. Needs a Refero account and its MCP.",
+      "author": "Refero",
+      "repo": "referodesign/refero_skill",
+      "ref": "2382e518f90096df607196b9a635da2d1bc142f9",
+      "license": "MIT",
+      "licenses": [
+        "LICENSE"
+      ],
+      "skills": {
+        "refero-design": "skills/refero-design"
+      },
+      "hashes": {
+        "refero-design": "2ade4b8a7be1a9e4"
+      }
+    },
+    {
+      "id": "transitions",
+      "group": "transitions",
+      "about": "Thirty-two CSS transitions and a motion-token polish pass. Fetched from the author at install.",
+      "author": "Jakub Antalik",
+      "repo": "Jakubantalik/transitions.dev",
+      "ref": "e3aefb554d8fd2cb3e91e773e82a0f2d5a4f82a0",
+      "license": "Transitions.dev License",
+      "licenses": [
+        "LICENSE"
+      ],
+      "fetch": true,
+      "skills": {
+        "transitions-dev": "skills/transitions-dev",
+        "transitions-polish": "skills/transitions-polish"
+      }
+    }
+  ]
+}

@@ -17,7 +17,7 @@ A video here is a folder of plain HTML scenes inside the repo it is about. The `
 
 ## Before anything
 
-- Check `studio doctor`. If `studio` is missing, the tool is the `studio` repository: clone it, run `npm install`, run `PLAYWRIGHT_BROWSERS_PATH=0 npx playwright install chromium-headless-shell`, then `npm link`. It needs Node 22 and FFmpeg.
+- Check `studio doctor`. If `studio` is missing, the tool sits at the root of the repository this skill lives in, two folders up: from there, run `npm install`, run `PLAYWRIGHT_BROWSERS_PATH=0 npx playwright install chromium-headless-shell`, then `npm link`. It needs Node 22 and FFmpeg.
 - Chromium cannot start inside a macOS app sandbox, and that includes the sandbox most agent shells run in. When `doctor` says the browser is blocked, tell the user and ask for the render to run in their terminal or outside the sandbox. Do not look for another way to render.
 - Look for `motion/` or any folder with a `project.json` in the repo. Read its `AGENTS.md` first. It carries the commands and rules for that project and is the more current source than this file.
 

@@ -5,3 +5,7 @@ out/
 .frames/
 frames/
 .design-refs/
+.fetched/
+.DS_Store
+__pycache__/
+.taste-skill/
