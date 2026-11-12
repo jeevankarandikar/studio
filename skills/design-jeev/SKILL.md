@@ -31,9 +31,11 @@ Load a reference when the work touches its subject, and only then:
 | [lenses.md](references/lenses.md) | Shaping a screen or defending a decision: named designers' lenses, the UX laws, the disclosure ladder |
 | [craft.md](references/craft.md) | Type, color, spacing, hierarchy, shadows and depth |
 | [interaction.md](references/interaction.md) | Control states, forms, waiting, overlays, keyboard, motion timing, first run and empty states |
+| [elastic-feedback.md](references/elastic-feedback.md) | A press, toggle or choice that should answer with one small spring, and where that does not belong |
 | [words.md](references/words.md) | Labels, buttons, errors and other interface text |
 | [data-viz.md](references/data-viz.md) | Any chart or dashboard |
 | [product-demos.md](references/product-demos.md) | Anything that shows a product instead of being it: heroes, films, bento tiles, onboarding art, screenshots on a page, and which of those rules reach real screens |
+| [scroll-scenes.md](references/scroll-scenes.md) | A marketing page told as scroll scenes: a sticky product stage that the steps beside it drive |
 | [verticals.md](references/verticals.md) | What a field demands: money, developer tools, business software, health, shops, AI products, consumer apps, landing pages |
 
 ## Explore
