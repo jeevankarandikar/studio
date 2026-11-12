@@ -16,7 +16,7 @@
       "about": "Emil Kowalski's design engineering and animation craft.",
       "author": "Emil Kowalski",
       "repo": "emilkowalski/skills",
-      "ref": "f1090bec277140d02ed202440185ad9d02ac1490",
+      "ref": "f7ce8c02d6e3c8f0d980a44c57bcc41a40254349",
       "license": "MIT",
       "licenses": [
         "LICENSE"
@@ -32,6 +32,7 @@
         "emil-design-eng": "skills/emil-design-eng",
         "find-animation-opportunities": "skills/find-animation-opportunities",
         "improve-animations": "skills/improve-animations",
+        "learn-taste": "skills/learn-taste",
         "mobile-native": "skills/mobile-native",
         "pick-ui-library": "skills/pick-ui-library",
         "prototype": "skills/prototype",
@@ -39,21 +40,22 @@
         "review-animations": "skills/review-animations"
       },
       "hashes": {
-        "animate": "3e7bd86a38cc7743",
-        "animate-expo": "99547d1871a8eca1",
-        "animation-performance": "c9f09c37ea0864db",
-        "animation-vocabulary": "50ecf754f0213b56",
-        "apple-design": "d0c0d22170c7c5bd",
-        "ask-sonner": "50769245a7ad44b8",
-        "break-ui": "186dbd0b0fbce7a8",
-        "emil-design-eng": "18593ce315bc53e0",
-        "find-animation-opportunities": "1adb21f312ddde0c",
-        "improve-animations": "413408d67d1487ca",
-        "mobile-native": "9bbb988f181fe2d8",
-        "pick-ui-library": "96ce70d1d14ac0c3",
-        "prototype": "1d67ba38ce297d72",
-        "remove-animations": "c831400a1275146f",
-        "review-animations": "702eca23189814e6"
+        "animate": "c7d24b27902f914b",
+        "animate-expo": "bf9850699305583a",
+        "animation-performance": "6eaccef1d7d843e2",
+        "animation-vocabulary": "ae29c62d2b455992",
+        "apple-design": "8bacd1a33dd3c2d7",
+        "ask-sonner": "335a2e39202cb44d",
+        "break-ui": "62cddc43e9c99100",
+        "emil-design-eng": "1acc97926518ac77",
+        "find-animation-opportunities": "7fa3a4188c050073",
+        "improve-animations": "4af71dc822efe2be",
+        "learn-taste": "ad129b7ea9f7aafc",
+        "mobile-native": "f52d3937f030d37f",
+        "pick-ui-library": "c25168573c4e7385",
+        "prototype": "f9a065324cdfbebe",
+        "remove-animations": "d07164a3e03881b5",
+        "review-animations": "70f48ed9a816c82b"
       }
     },
     {

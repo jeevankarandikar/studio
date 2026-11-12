@@ -4,7 +4,7 @@ The MIT license in `LICENSE` covers the work of this repository's author: `skill
 
 ## Copied here
 
-**Emil Kowalski's skills.** MIT, from github.com/emilkowalski/skills. In `skills/`: `animate`, `animate-expo`, `animation-performance`, `animation-vocabulary`, `apple-design`, `ask-sonner`, `break-ui`, `emil-design-eng`, `find-animation-opportunities`, `improve-animations`, `mobile-native`, `pick-ui-library`, `prototype`, `remove-animations`, `review-animations`. Unchanged.
+**Emil Kowalski's skills.** MIT, from github.com/emilkowalski/skills. In `skills/`: `animate`, `animate-expo`, `animation-performance`, `animation-vocabulary`, `apple-design`, `ask-sonner`, `break-ui`, `emil-design-eng`, `find-animation-opportunities`, `improve-animations`, `learn-taste`, `mobile-native`, `pick-ui-library`, `prototype`, `remove-animations`, `review-animations`. Unchanged.
 
 **Impeccable by Paul Bakaus.** Apache 2.0 with its NOTICE, from github.com/pbakaus/impeccable. In `skills/impeccable` and `agents/`. Unchanged. Its `ios.md` and `android.md` references derive from ehmo's platform-design-skills (MIT), whose license is in `skills/impeccable`.
 

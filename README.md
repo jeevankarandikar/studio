@@ -46,6 +46,7 @@ Codex skips a new hook until you trust it. Open Codex, type `/hooks`, and press 
 | Make a web app feel native on a phone | [`mobile-native`](skills/mobile-native) | emil |
 | Try several versions of one piece of UI | [`prototype`](skills/prototype) | emil |
 | Break a screen with worst-case data | [`break-ui`](skills/break-ui) | emil |
+| Turn the design corrections from a session into written rules | [`learn-taste`](skills/learn-taste) | emil |
 | Pick a UI library, or set up toasts with Sonner | [`pick-ui-library`](skills/pick-ui-library), [`ask-sonner`](skills/ask-sonner) | emil |
 | Drop in a ready-made CSS transition, or tune existing timing | `transitions-dev`, `transitions-polish`, fetched from the author when you install them | transitions |
 
