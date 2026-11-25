@@ -9,3 +9,6 @@ frames/
 .DS_Store
 __pycache__/
 .taste-skill/
+# Types and tsconfig the engine writes into a mod when it loads it.
+mods/*/.claude-plugin/types/
+mods/*/tsconfig.json

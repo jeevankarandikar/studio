@@ -10,6 +10,7 @@
     python3 install.py --no-guard       leave the writing guard out
     python3 install.py --remove         take out everything this clone installed
     python3 install.py --check          confirm vendored skills match their pins and licenses
+    python3 install.py --mods           print the CLAUDE_CODE_PLUGIN_DIRS value for the Claude Code mods
 
 Skills are links into this clone, so `git pull` updates them. Running it twice changes
 nothing, and a real folder is never replaced.
@@ -140,8 +141,20 @@ def check() -> None:
     raise SystemExit(1 if bad else 0)
 
 
+def mods() -> None:
+    # mods-pane goes first so it sees the others load. Nothing here writes settings.
+    folders = sorted((HERE / "mods").glob("*/.claude-plugin/plugin.json"))
+    names = sorted((f.parent.parent for f in folders), key=lambda d: (d.name != "mods-pane", d.name))
+    value = ":".join(str(d) for d in names)
+    print("Add this under env in ~/.claude/settings.json. Keep mods-pane first if you join other folders to it with a colon.")
+    print(json.dumps({"CLAUDE_CODE_PLUGIN_DIRS": value}, indent=2))
+    print("Start a new session afterwards. Cursor and Codex: python3 mods/fleet-gauge/other-agents/install.py")
+
+
 def main() -> None:
     args = sys.argv[1:]
+    if "--mods" in args:
+        return mods()
     if "--list" in args:
         return show()
     if "--check" in args:
