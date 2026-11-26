@@ -37,6 +37,7 @@ Load a reference when the work touches its subject, and only then:
 | [product-demos.md](references/product-demos.md) | Anything that shows a product instead of being it: heroes, films, bento tiles, onboarding art, screenshots on a page, and which of those rules reach real screens |
 | [scroll-scenes.md](references/scroll-scenes.md) | A marketing page told as scroll scenes: a sticky product stage that the steps beside it drive |
 | [verticals.md](references/verticals.md) | What a field demands: money, developer tools, business software, health, shops, AI products, consumer apps, landing pages |
+| [site-patterns.md](references/site-patterns.md) | Venue, local business, studio and marketing sites: choosing a style, phone nav, the one action, footers, scroll motion, and a checklist for a built page |
 
 ## Explore
 
