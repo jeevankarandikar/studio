@@ -70,6 +70,10 @@ Three Claude Code mods sit in `mods/`. They need Claude Code 2.1.287 or later, a
 - `mods/` holds the Claude Code mods, each with its tests.
 - `skills.json` and `scripts/vendor.py` pin each third-party skill to a commit and update it.
 
+## History
+
+Studio began on 28 May 2026 as skill-issue, eight general skills for Claude Code. The design skill, the motion skill and the writing guard grew there until 2 November, when they moved here, and the October video engine work joined them. Both earlier lines are in this repository's log, so `git log` shows the work from the first commit.
+
 ## Credit
 
 The design skill, video skill, writing guard, mods and engine are MIT, under [LICENSE](LICENSE). Every other skill belongs to its author and keeps its own license, which sits in its folder beside an `UPSTREAM.json` naming the source commit. [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) has the full list.
