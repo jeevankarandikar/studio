@@ -36,6 +36,7 @@ Codex skips a new hook until you trust it. Open Codex, type `/hooks`, and press 
 | Audit a screen, polish it, make it bolder or quieter | [`impeccable`](skills/impeccable) | impeccable |
 | Give a landing page or portfolio a real art direction | [`taste-skill`](skills/taste-skill) | taste |
 | Draw a product hero, demo or bento tile | [`stageshow`](skills/stageshow) | stageshow |
+| Run a whole site through Stageshow's playground and film gate at every width | [`stageshow_pass.py`](docs/stageshow-pass.md) | core |
 | Study real products before designing | [`refero-design`](skills/refero-design), which needs a Refero account | refero |
 | Learn the thinking behind polished UI | [`emil-design-eng`](skills/emil-design-eng) | emil |
 | Build a new animation | [`animate`](skills/animate), or [`animate-expo`](skills/animate-expo) in React Native | emil |
@@ -69,6 +70,7 @@ Three Claude Code mods sit in `mods/`. They need Claude Code 2.1.287 or later, a
 - `agents/` holds the subagents that `impeccable` calls.
 - `mods/` holds the Claude Code mods, each with its tests.
 - `skills.json` and `scripts/vendor.py` pin each third-party skill to a commit and update it.
+- `scripts/stageshow_pass.py` serves a site, links it into Stageshow's playground and runs the film gate, documented in [docs/stageshow-pass.md](docs/stageshow-pass.md).
 
 ## History
 
