@@ -50,6 +50,16 @@ Codex skips a new hook until you trust it. Open Codex, type `/hooks`, and press 
 | Pick a UI library, or set up toasts with Sonner | [`pick-ui-library`](skills/pick-ui-library), [`ask-sonner`](skills/ask-sonner) | emil |
 | Drop in a ready-made CSS transition, or tune existing timing | `transitions-dev`, `transitions-polish`, fetched from the author when you install them | transitions |
 
+## Mods
+
+Three Claude Code mods sit in `mods/`. They need Claude Code 2.1.287 or later, and `python3 install.py --mods` prints the line that loads them in every session.
+
+| To do this | Use |
+| --- | --- |
+| See usage limits and context fill above the prompt, with a suggestion to compact | [`fleet-gauge`](mods/fleet-gauge), which also gives Cursor and Codex a tool-call limit |
+| Put a model and effort table in the system prompt and hold an agent call that names no model | [`model-routing`](mods/model-routing) |
+| List every mod with whether it loaded and its last error | [`mods-pane`](mods/mods-pane) |
+
 ## Where things are
 
 - `skills/` holds one folder per skill.
@@ -57,8 +67,9 @@ Codex skips a new hook until you trust it. Open Codex, type `/hooks`, and press 
 - `studio/`, `kit/` and `templates/` are the video engine, documented in [docs/video.md](docs/video.md).
 - `projects/` holds films made with it.
 - `agents/` holds the subagents that `impeccable` calls.
+- `mods/` holds the Claude Code mods, each with its tests.
 - `skills.json` and `scripts/vendor.py` pin each third-party skill to a commit and update it.
 
 ## Credit
 
-The design skill, video skill, writing guard and engine are MIT, under [LICENSE](LICENSE). Every other skill belongs to its author and keeps its own license, which sits in its folder beside an `UPSTREAM.json` naming the source commit. [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) has the full list.
+The design skill, video skill, writing guard, mods and engine are MIT, under [LICENSE](LICENSE). Every other skill belongs to its author and keeps its own license, which sits in its folder beside an `UPSTREAM.json` naming the source commit. [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) has the full list.

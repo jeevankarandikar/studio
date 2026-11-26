@@ -1,0 +1,5 @@
+{
+  "name": "model-routing",
+  "version": "0.2.0",
+  "description": "Puts a model and effort routing table for Haiku, Sonnet, Opus and Fable in the system prompt, and holds an agent or session call once when it names no model or one that does not fit"
+}

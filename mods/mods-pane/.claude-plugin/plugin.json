@@ -1,0 +1,6 @@
+{
+  "name": "mods-pane",
+  "version": "0.1.0",
+  "description": "A pane listing each mod with whether it is on, what it does, and the last error seen this session. Open it with /mod-list.",
+  "types": "./types/index.d.ts"
+}

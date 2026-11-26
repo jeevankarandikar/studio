@@ -1,0 +1,26 @@
+{
+  "name": "fleet-gauge",
+  "version": "0.2.0",
+  "description": "Weekly and five-hour usage with reset times, context fill, a compact suggestion at a threshold you set, optional auto-compact, and each subagent's call count.",
+  "types": "./types/index.d.ts",
+  "userConfig": {
+    "compact_at": {
+      "type": "number",
+      "title": "Suggest compacting at (% of the window)",
+      "description": "The band turns yellow and a toast suggests /compact once context reaches this share of the window.",
+      "default": 40
+    },
+    "auto_compact": {
+      "type": "boolean",
+      "title": "Auto-compact",
+      "description": "Compact the conversation after a turn ends once context reaches the auto-compact share. Off unless you turn it on.",
+      "default": false
+    },
+    "auto_compact_at": {
+      "type": "number",
+      "title": "Auto-compact at (% of the window)",
+      "description": "Used only when auto-compact is on.",
+      "default": 60
+    }
+  }
+}
