@@ -29,12 +29,17 @@ CLAUDE = Path(os.environ.get("CLAUDE_CONFIG_DIR") or HOME / ".claude")
 CODEX = Path(os.environ.get("CODEX_HOME") or HOME / ".codex")
 CURSOR = HOME / ".cursor"
 STATE = Path(os.environ.get("STUDIO_STATE") or HOME / ".local" / "state" / "studio")
+# Settings a skill reads in any agent. Only Claude Code hands its settings env to the
+# shell, so values Codex and Cursor need too are also written here, one file each.
+CONFIG = Path(os.environ.get("STUDIO_CONFIG") or HOME / ".config" / "studio")
+SHARED_ENV = {"VOICE_CONTEXT": "voice-context"}
 HISTORY = STATE / "history"
 
 WATCHED_FILES = [
     CLAUDE / "settings.json", CLAUDE / "CLAUDE.md",
     CODEX / "hooks.json", CODEX / "AGENTS.md", CODEX / "config.toml",
     CURSOR / "hooks.json", CURSOR / "rules" / "studio-instructions.mdc",
+    *(CONFIG / name for name in SHARED_ENV.values()),
 ]
 WATCHED_FOLDERS = [
     CLAUDE / "skills", CLAUDE / "agents", HOME / ".agents" / "skills",
@@ -311,6 +316,17 @@ def settings(layers: list[Path]) -> None:
     for layer in layers:
         merge(data, read_json(layer))
     print(write_json(path, data))
+    env = data.get("env") if isinstance(data.get("env"), dict) else {}
+    for key, name in SHARED_ENV.items():
+        if isinstance(env.get(key), str) and env[key]:
+            target = CONFIG / name
+            text = env[key] + "\n"
+            if target.is_file() and target.read_text() == text:
+                print(f"no change: {target}")
+                continue
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_text(text)
+            print(f"wrote {target}, so every agent's skills can read {key}")
 
 
 def guards(chosen: list[str]) -> None:

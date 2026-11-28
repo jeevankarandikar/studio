@@ -82,7 +82,7 @@ Five Claude Code mods sit in `mods/`. They need Claude Code 2.1.287 or later, an
 python3 install.py --guards --settings --instructions
 ```
 
-`--guards` wires the two guards into every agent. `--settings` adds `settings/claude.json` and the mods to `~/.claude/settings.json`, and `--layer FILE` adds a JSON file of your own after it; a key you already set keeps its value. `--instructions` copies `~/.claude/CLAUDE.md` to Codex's `AGENTS.md` and a Cursor rule. `--retire PATH` first takes out every hook, mod folder and link that points into an old kit at `PATH`.
+`--guards` wires the two guards into every agent. `--settings` adds `settings/claude.json` and the mods to `~/.claude/settings.json`, and `--layer FILE` adds a JSON file of your own after it; a key you already set keeps its value. `--instructions` copies `~/.claude/CLAUDE.md` to Codex's `AGENTS.md` and a Cursor rule. A `VOICE_CONTEXT` value in your settings is also written to `~/.config/studio/voice-context`, so the voice skill finds your files in Codex and Cursor too. `--retire PATH` first takes out every hook, mod folder and link that points into an old kit at `PATH`.
 
 Every run that changes a file keeps the old version under `~/.local/state/studio/history`. `install.py --history` lists them, `--diff ID` compares one with what is there now, and `--rollback ID` puts it back.
 

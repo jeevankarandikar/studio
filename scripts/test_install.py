@@ -65,7 +65,7 @@ def build(home: Path) -> Path:
     (cursor / "plugins" / "local" / "kit").symlink_to(kit)
     (cursor / "hooks.json").write_text(json.dumps({"version": 1, "hooks": {"beforeShellExecution": [
         {"command": f'python3 "{kit}/hooks/bash_guard.py" --cursor-native', "timeout": 10}]}}))
-    (home / "layer.json").write_text(json.dumps({"env": {"STUDIO_GUARD_BLOCKED": "~/Desktop"}, "model": "sonnet"}))
+    (home / "layer.json").write_text(json.dumps({"env": {"STUDIO_GUARD_BLOCKED": "~/Desktop", "VOICE_CONTEXT": "~/notes/voice.md"}, "model": "sonnet"}))
     return kit
 
 
@@ -84,7 +84,7 @@ def tree(root: Path) -> dict:
 
 
 def run(home: Path, *args: str) -> str:
-    env = {k: v for k, v in os.environ.items() if k not in ("CLAUDE_CONFIG_DIR", "CODEX_HOME", "STUDIO_STATE")}
+    env = {k: v for k, v in os.environ.items() if k not in ("CLAUDE_CONFIG_DIR", "CODEX_HOME", "STUDIO_STATE", "STUDIO_CONFIG")}
     env["HOME"] = str(home)
     done = subprocess.run([sys.executable, "-B", str(HERE / "install.py"), *args], env=env,
                           capture_output=True, text=True)
@@ -119,6 +119,7 @@ def main() -> None:
         assert sum(d.endswith("/fleet-gauge") for d in dirs) == 1
         assert settings["model"] == "opus"  # the person's value stays
         assert settings["env"]["STUDIO_GUARD_BLOCKED"] == "~/Desktop"
+        assert (home / ".config/studio/voice-context").read_text() == "~/notes/voice.md\n"
         assert settings["permissions"]["allow"] == ["Bash(ls:*)"]
         assert str(HERE / "guards" / "bash_guard.py") in text and str(HERE / "guards" / "file_guard.py") in text
         assert "writing_guard.py" in text and "SessionStart" in settings["hooks"]
