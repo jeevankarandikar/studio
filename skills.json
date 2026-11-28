@@ -2,10 +2,12 @@
   "note": "Third-party skills, pinned by commit. scripts/vendor.py copies them into skills/, and install.py reads the groups. Never edit a vendored folder by hand.",
   "groups": {
     "core": {
-      "about": "The design skill, the video skill and the writing guard. Installed by default.",
+      "about": "The design, video, voice and papercut skills and the writing guard. Installed by default.",
       "skills": [
         "design-jeev",
-        "motion"
+        "motion",
+        "voice",
+        "log-papercut"
       ]
     }
   },

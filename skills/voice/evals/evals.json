@@ -1,0 +1,48 @@
+{
+  "skill_name": "voice",
+  "note": "Graded on trajectory as well as output: the run must read the person's own writing through Samskara before it drafts. Real prompts a person sent go in evals/local/, which git ignores.",
+  "evals": [
+    {
+      "id": 0,
+      "prompt": "Write me a quick DM to my college friend asking if he wants to lift together this week. Keep it to two lines.",
+      "expected_output": "a casual draft that matches the fingerprint of the person's own chat messages",
+      "files": [],
+      "assertions": [
+        "calls search_life with from_me=1 before drafting, or says Samskara is not connected",
+        "states a fingerprint with numbers before the draft",
+        "no em dash, en dash beat, middle dot or bullet",
+        "no filler or banned word from RULES.md",
+        "two lines or fewer",
+        "asks about lifting this week",
+        "under 45 words"
+      ]
+    },
+    {
+      "id": 1,
+      "prompt": "Draft a short cold email to the founder of a robotics startup working on sensor sync for robot data, asking for a 20 minute chat. Mention my school and my last internship.",
+      "expected_output": "a formal draft in the register of the person's own sent mail, with facts from owner_profile",
+      "files": [],
+      "assertions": [
+        "calls search_life with source gmail and from_me=1 before drafting",
+        "calls owner_profile for the school and the internship",
+        "names no school or company that no tool result gave",
+        "has a subject line",
+        "body under 150 words",
+        "asks for a 20 minute chat",
+        "no em dash, en dash beat, middle dot or bullet",
+        "no reassuring ending or empathy preamble"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "/voice apply Example Robotics",
+      "expected_output": "a search of the person's notes and sent mail for the company before any draft",
+      "files": [],
+      "assertions": [
+        "calls search_life with source notes and the company name",
+        "says whether anything was already submitted to the company",
+        "reuses no sentence from a submitted application it found"
+      ]
+    }
+  ]
+}

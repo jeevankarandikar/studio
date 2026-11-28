@@ -12,6 +12,17 @@
     python3 install.py --check          confirm vendored skills match their pins and licenses
     python3 install.py --mods           print the CLAUDE_CODE_PLUGIN_DIRS value for the Claude Code mods
 
+Agent config, each kept in a history entry (see scripts/agents_setup.py):
+
+    python3 install.py --settings           add settings/claude.json and the mods to ~/.claude/settings.json
+    python3 install.py --layer FILE         with --settings, add a JSON file of your own after it
+    python3 install.py --guards             wire guards/ into Claude Code, Codex and Cursor
+    python3 install.py --instructions       copy ~/.claude/CLAUDE.md to Codex's AGENTS.md and a Cursor rule
+    python3 install.py --retire PATH        first take out every hook, mod and link pointing into PATH
+    python3 install.py --history            list what earlier runs replaced
+    python3 install.py --diff ID            compare one entry with what is there now
+    python3 install.py --rollback ID        put back what that run replaced
+
 Skills are links into this clone, so `git pull` updates them. Running it twice changes
 nothing, and a real folder is never replaced.
 """
@@ -151,6 +162,17 @@ def mods() -> None:
     print("Start a new session afterwards. Cursor and Codex: python3 mods/fleet-gauge/other-agents/install.py")
 
 
+def _values(args: list[str], flag: str) -> list[str]:
+    found = []
+    while flag in args:
+        at = args.index(flag)
+        if at + 1 == len(args):
+            raise SystemExit(f"{flag} needs a value")
+        found.append(args.pop(at + 1))
+        args.pop(at)
+    return found
+
+
 def main() -> None:
     args = sys.argv[1:]
     if "--mods" in args:
@@ -159,6 +181,20 @@ def main() -> None:
         return show()
     if "--check" in args:
         return check()
+    import agents_setup
+
+    if "--history" in args:
+        return agents_setup.history()
+    for flag, action in (("--diff", agents_setup.diff), ("--rollback", agents_setup.rollback)):
+        if flag in args:
+            return action(_values(args, flag)[0])
+    with agents_setup.Session("install.py " + " ".join(args)) as session:
+        install(args, session, agents_setup)
+
+
+def install(args: list[str], session, agents_setup) -> None:
+    retired = [Path(p).expanduser() for p in _values(args, "--retire")]
+    layers = [Path(p).expanduser() for p in _values(args, "--layer")]
     remove = "--remove" in args
     guard = "--no-guard" not in args
     project = None
@@ -175,6 +211,8 @@ def main() -> None:
     for group in groups:
         if group not in SOURCES:
             raise SystemExit(f"no group called {group}; --list shows them")
+    for old in retired:
+        agents_setup.retire(old, session, set(skill_paths(groups)))
     for skills, agents in destinations(chosen, project):
         if remove:
             clear(skills)
@@ -188,7 +226,16 @@ def main() -> None:
                 print(place(agents / file.name, file))
     if guard and not project:
         flags = [f"--{a}" for a in chosen] + (["--remove"] if remove else [])
-        subprocess.run([sys.executable, str(HERE / "writing-guard" / "install.py"), *flags], check=True)
+        subprocess.run([sys.executable, str(HERE / "writing-guard" / "install.py"), *flags], check=True,
+                       env={**os.environ, "STUDIO_HISTORY": "1"})
+    if project or remove:
+        return
+    if "--guards" in args:
+        agents_setup.guards(chosen)
+    if "--settings" in args:
+        agents_setup.settings(layers)
+    if "--instructions" in args:
+        agents_setup.instructions(chosen)
 
 
 if __name__ == "__main__":

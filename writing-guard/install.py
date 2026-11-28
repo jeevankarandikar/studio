@@ -51,11 +51,15 @@ def wire(agent: str, remove: bool) -> str:
         return f"{path}: a hooks entry is not a list, left alone"
     command = f'python3 "{GUARD}"{flag}'
     for event, matcher in events.items():
-        entries = [e for e in hooks.get(event, []) if not ours(e)]
+        hook = {"command": command, "timeout": 10}
+        entry = {"hooks": [{"type": "command", **hook}]} if nested else hook
+        entry = {"matcher": matcher, **entry} if matcher else entry
+        current = hooks.get(event, [])
+        if not remove and [e for e in current if ours(e)] == [entry]:
+            continue  # already there as written; moving it would rewrite the file for nothing
+        entries = [e for e in current if not ours(e)]
         if not remove:
-            hook = {"command": command, "timeout": 10}
-            entry = {"hooks": [{"type": "command", **hook}]} if nested else hook
-            entries.append({"matcher": matcher, **entry} if matcher else entry)
+            entries.append(entry)
         if entries:
             hooks[event] = entries
         else:
@@ -68,7 +72,8 @@ def wire(agent: str, remove: bool) -> str:
         return f"no change: {path}"
     root.mkdir(parents=True, exist_ok=True)
     backup = path.with_name(f"{filename}.before-writing-guard")
-    if path.exists() and not backup.exists():
+    # studio's install.py keeps its own history of every file it changes
+    if path.exists() and not backup.exists() and not os.environ.get("STUDIO_HISTORY"):
         shutil.copy2(path, backup)
     temp = path.with_name(f".{filename}.tmp")
     temp.write_text(json.dumps(data, indent=2) + "\n")

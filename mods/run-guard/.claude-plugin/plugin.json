@@ -1,0 +1,5 @@
+{
+  "name": "run-guard",
+  "version": "0.2.0",
+  "description": "Holds a Bash command once when it runs claude -p with the desktop app's API key, and, with RUN_GUARD_ settings, when it runs a check against the real data home or a run of hours in the foreground"
+}

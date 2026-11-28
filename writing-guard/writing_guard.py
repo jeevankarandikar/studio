@@ -77,6 +77,17 @@ def exempt(path: str) -> bool:
     return any(part in norm for part in extra)
 
 
+# Folders that hold someone's own words verbatim: a quoted span there is theirs, kept
+# as written, and the rules apply only to the prose around it.
+OWN_QUOTE = re.compile(r"“[^”]*”|\"[^\"\n]*\"")
+
+
+def quotes_kept(path: str) -> bool:
+    norm = os.path.abspath(path).replace("\\", "/")
+    kept = [p for p in os.environ.get("WRITING_GUARD_QUOTES", "").split(":") if p]
+    return any(part in norm for part in kept)
+
+
 def hit(text: str, old: str = "", checks=CHECKS):
     """return (what, snippet) for the first rule the text breaks, or None.
 
@@ -100,7 +111,10 @@ def file_verdict(path: str, text: str, old: str = ""):
         return 0, ""
     if not path.lower().endswith(PROSE_EXT) or exempt(path):
         return 0, ""
-    found = hit(text, old if isinstance(old, str) else "")
+    old = old if isinstance(old, str) else ""
+    if quotes_kept(path):
+        text, old = OWN_QUOTE.sub("", text), OWN_QUOTE.sub("", old)
+    found = hit(text, old)
     if found:
         return 2, MSG.format(what=found[0], snippet=found[1])
     return 0, ""
@@ -238,6 +252,19 @@ def _selftest() -> None:
     for t in allow:
         assert file_verdict("/x/a.md", t)[0] == 0, t
         assert not reply_hit(t), t
+    saved = os.environ.get("WRITING_GUARD_QUOTES")
+    os.environ["WRITING_GUARD_QUOTES"] = "/own-words/"
+    try:
+        own = "/x/own-words/posts.md"
+        assert file_verdict(own, "“this journey of mine\n\nhas been a gift”")[0] == 0
+        assert file_verdict(own, 'SAY "this journey of mine"')[0] == 0
+        assert file_verdict(own, "this journey of mine")[0] == 2
+        assert file_verdict("/x/a.md", "“this journey”")[0] == 2
+    finally:
+        if saved is None:
+            os.environ.pop("WRITING_GUARD_QUOTES", None)
+        else:
+            os.environ["WRITING_GUARD_QUOTES"] = saved
     assert file_verdict("/x/a.py", "leverage · —")[0] == 0
     assert file_verdict(os.path.join(HERE, "RULES.md"), "delve")[0] == 0
     os.environ["WRITING_GUARD_EXEMPT"] = "/quotes/:/style-guide.md"

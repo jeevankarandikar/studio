@@ -1,0 +1,34 @@
+{
+  "note": "Shared Claude Code settings that install.py --settings adds to ~/.claude/settings.json. {studio} is this clone. A key already set there keeps its value; CLAUDE_CODE_PLUGIN_DIRS is filled from mods/.",
+  "sandbox": {
+    "excludedCommands": [
+      "node studio/critique/loop.mjs",
+      "node studio/render.mjs"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Skill",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"{studio}/guards/skill_events.py\"",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"{studio}/guards/skill_events.py\"",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}

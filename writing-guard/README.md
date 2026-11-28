@@ -40,6 +40,8 @@ Files that must quote what the rules ban, such as a style guide, are skipped whe
 "WRITING_GUARD_EXEMPT": "/docs/style-guide.md:/quotes/"
 ```
 
+A folder that keeps someone's own words verbatim, such as a bank of their posts, can keep its quoted spans as written. List it in `WRITING_GUARD_QUOTES`, in the same form, and the rules apply only to the prose around the quotes.
+
 This folder is always exempt.
 
 ## Check it

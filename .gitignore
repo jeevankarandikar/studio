@@ -12,3 +12,6 @@ __pycache__/
 # Types and tsconfig the engine writes into a mod when it loads it.
 mods/*/.claude-plugin/types/
 mods/*/tsconfig.json
+# Real prompts a person sent, for their own evals. Never committed.
+skills/*/evals/local/
+evals/local/

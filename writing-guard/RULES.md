@@ -17,6 +17,7 @@ The guard reads this list to the model at the start of every session, so it writ
 - Counts are what the content has, never a round number chosen for symmetry.
 - One hedge at most. "May potentially help in some cases" is three.
 - No middle-dot separators between items in labels, captions, meta lines, or rows. Commas, a sentence, or separate elements.
+- A page talks about its subject, never about itself. No headings that describe a section instead of naming it ("What you get"), no counts of the page's own content ("All 130 items"), no notes explaining the interface ("Dots mark spice"), no "preview" banners. Describe a business in its own words, from its menu, sign or listing.
 
 ## What the guard catches
 

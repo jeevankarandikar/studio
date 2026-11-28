@@ -1,0 +1,6 @@
+{
+  "name": "prompt-guard",
+  "version": "0.1.0",
+  "description": "Gives every task a finish line: a note beside a prompt that names no check, a plan for a wide one, a nudge in a long session, and a second pass on a reply that claims a check no command ran.",
+  "types": "./types/index.d.ts"
+}
